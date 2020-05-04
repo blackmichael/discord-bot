@@ -2,7 +2,6 @@ package blackmichael.discord
 
 import blackmichael.discord.command.Command
 import blackmichael.discord.command.SourceCode
-import blackmichael.discord.command.classifier.SubjectClassifier
 import blackmichael.discord.command.classifier.subjectClassifierCommand
 import blackmichael.discord.command.helpCommand
 import blackmichael.discord.command.pingPongCommand

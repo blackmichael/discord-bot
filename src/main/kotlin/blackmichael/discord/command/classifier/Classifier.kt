@@ -2,7 +2,7 @@ package blackmichael.discord.command.classifier
 
 interface Classifier {
 
-    fun getMessage(subject: String) : String {
+    fun getMessage(subject: String): String {
         return when (classify(subject)) {
             true -> getAffirmativeMessage(subject)
             false -> getNegativeMessage(subject)

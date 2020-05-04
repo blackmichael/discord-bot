@@ -1,6 +1,5 @@
 package blackmichael.discord.command.classifier
 
-import com.jessecorbett.diskord.util.EnhancedEventListener
 import kotlin.random.Random
 
 class PotatoClassifier(
@@ -23,4 +22,3 @@ class PotatoClassifier(
         return "Nah, $subject is not a potato."
     }
 }
-

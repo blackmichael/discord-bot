@@ -22,6 +22,7 @@ class Potato(
         commandSet.command("is") {
             val subject = content.removePrefix("${commandSet.prefix}is ")
                 .removeSuffix("a potato?")
+                .trim()
             // the bot is always a potato, obviously
             val message = if (subject.trim() == botId.trim()) {
                 isPotatoMessage(subject, true)

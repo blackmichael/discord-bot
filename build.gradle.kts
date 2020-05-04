@@ -1,3 +1,5 @@
+import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
+
 repositories {
     jcenter()
     mavenCentral()
@@ -8,6 +10,15 @@ plugins {
     application
     kotlin("jvm") version "1.3.72"
     id("org.jlleitschuh.gradle.ktlint") version "9.2.1"
+    id("com.github.johnrengelman.shadow") version "5.2.0"
+}
+
+val build: DefaultTask by tasks
+val shadowJar: ShadowJar by tasks
+build.dependsOn(shadowJar)
+shadowJar.apply {
+    baseName = "discord-bot"
+    archiveName = "discord-bot.jar"
 }
 
 java {

@@ -2,9 +2,9 @@ package blackmichael.discord
 
 import blackmichael.discord.command.Command
 import blackmichael.discord.command.SourceCode
+import blackmichael.discord.command.classifier.subjectClassifierCommand
 import blackmichael.discord.command.helpCommand
 import blackmichael.discord.command.pingPongCommand
-import blackmichael.discord.command.potatoCommand
 import blackmichael.discord.command.sourceCodeCommand
 import com.jessecorbett.diskord.dsl.bot
 import com.jessecorbett.diskord.dsl.commands
@@ -30,7 +30,7 @@ class DiscordBot(val config: Config) {
             commands(config.prefix) {
                 val commands: List<Command> = listOf(
                     pingPongCommand(this),
-                    potatoCommand(this, config.botId),
+                    subjectClassifierCommand(this, config.botId),
                     sourceCodeCommand(this, config.sourceCode)
                 )
 

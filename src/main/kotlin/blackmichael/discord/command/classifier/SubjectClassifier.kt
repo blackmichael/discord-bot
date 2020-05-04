@@ -8,9 +8,9 @@ import com.jessecorbett.diskord.util.EnhancedEventListener
 import kotlin.random.Random
 
 class SubjectClassifier(
-        eventListener: EnhancedEventListener,
-        commandSet: CommandSet,
-        private val botId: String
+    eventListener: EnhancedEventListener,
+    commandSet: CommandSet,
+    private val botId: String
 ) : Command(eventListener, commandSet) {
 
     val snarkyResponses = listOf<String>(
@@ -19,7 +19,7 @@ class SubjectClassifier(
             "Maybe someday I'll know the answer. Today is not that day")
 
     override val definition = Definition(
-            name = "Is this a potato?",
+            name = "Is this a thing?",
             description = "Determines if something is, or is not.",
             usage = "is <subject> a (potato|hobby)?"
     )
@@ -27,7 +27,7 @@ class SubjectClassifier(
     override fun EnhancedEventListener.run() {
         commandSet.command("is") {
             val isPotatoClassifier = content.removePrefix("${commandSet.prefix}is ").contains("potato")
-            val isHobbyClassifier = content.removePrefix("${commandSet.prefix}is ").contains("potato")
+            val isHobbyClassifier = content.removePrefix("${commandSet.prefix}is ").contains("hobby")
             if (isPotatoClassifier) {
                 val subject = content.removePrefix("${commandSet.prefix}is ")
                         .removeSuffix("a potato?")

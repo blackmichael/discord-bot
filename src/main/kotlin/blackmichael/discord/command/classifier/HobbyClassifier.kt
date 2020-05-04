@@ -5,7 +5,7 @@ import kotlin.random.Random
 class HobbyClassifier : Classifier {
 
     override fun classify(subject: String): Boolean {
-         return Random.nextBoolean()
+        return Random.nextBoolean()
     }
 
     override fun getAffirmativeMessage(subject: String): String {

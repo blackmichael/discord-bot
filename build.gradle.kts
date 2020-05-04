@@ -15,9 +15,9 @@ plugins {
 
 val build: DefaultTask by tasks
 val shadowJar: ShadowJar by tasks
+
 build.dependsOn(shadowJar)
 shadowJar.apply {
-    baseName = "discord-bot"
     archiveName = "discord-bot.jar"
 }
 
@@ -27,12 +27,13 @@ java {
 }
 
 application {
-    mainClassName = "blackmichael.discord.DiscordBotKt"
+    mainClassName = "blackmichael.discord.MainKt"
 }
 
 dependencies {
     implementation(kotlin("stdlib"))
 
+    implementation("io.ktor:ktor-server-netty:1.3.2")
     implementation("com.jessecorbett:diskord:1.6.2")
     implementation("io.github.config4k:config4k:0.4.1")
 

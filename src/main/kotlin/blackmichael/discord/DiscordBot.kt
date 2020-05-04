@@ -8,14 +8,6 @@ import blackmichael.discord.command.pingPongCommand
 import blackmichael.discord.command.sourceCodeCommand
 import com.jessecorbett.diskord.dsl.bot
 import com.jessecorbett.diskord.dsl.commands
-import com.typesafe.config.ConfigFactory
-import io.github.config4k.extract
-
-suspend fun main() {
-    val config = ConfigFactory.load()
-    val bot = DiscordBot(config.extract("bot"))
-    bot.start()
-}
 
 class DiscordBot(val config: Config) {
     data class Config(

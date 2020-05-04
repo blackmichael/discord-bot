@@ -15,7 +15,7 @@ class Potato(
     override val definition = Definition(
         name = "Is this a potato?",
         description = "Determines if something is a potato or not.",
-        usage ="is <subject> a potato?"
+        usage = "is <subject> a potato?"
     )
 
     override fun EnhancedEventListener.run() {

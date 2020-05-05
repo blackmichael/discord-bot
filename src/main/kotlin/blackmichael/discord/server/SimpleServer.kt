@@ -32,7 +32,7 @@ class SimpleServer(config: Config) : Closeable {
     }
 
     override fun close() {
-        log.info("stopping server")
+        log.info("closing server")
         server.stop(0, 0)
     }
 }

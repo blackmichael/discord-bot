@@ -3,8 +3,8 @@ package blackmichael.discord
 import blackmichael.discord.server.SimpleServer
 import com.typesafe.config.ConfigFactory
 import io.github.config4k.extract
-import kotlinx.coroutines.runBlocking
 import kotlin.system.exitProcess
+import kotlinx.coroutines.runBlocking
 
 fun main() {
     val config = ConfigFactory.load()

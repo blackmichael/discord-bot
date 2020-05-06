@@ -7,7 +7,7 @@ class PotatoClassifier(
 ) : Classifier {
 
     override fun classify(subject: String): Boolean {
-        return if (subject.trim() == botId.trim()) {
+        return if (subject.trim() == "<@${botId.trim()}>") {
             true
         } else {
             Random.nextBoolean()

@@ -8,13 +8,13 @@ import blackmichael.discord.command.pingPongCommand
 import blackmichael.discord.command.sourceCodeCommand
 import com.jessecorbett.diskord.dsl.Bot
 import com.jessecorbett.diskord.dsl.commands
+import java.io.Closeable
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import org.slf4j.LoggerFactory
-import java.io.Closeable
 
 class DiscordBot(val config: Config) : Closeable {
     data class Config(

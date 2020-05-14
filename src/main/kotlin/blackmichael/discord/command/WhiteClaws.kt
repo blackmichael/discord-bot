@@ -15,7 +15,7 @@ class WhiteClaws(eventListener: EnhancedEventListener, commandSet: CommandSet) :
         usage = "how many whiteclaws (am I|is <subject>) (going to|gonna) drink tonight?"
     )
 
-    val commandRegex = Regex("how many whiteclaws (am I|is .*) (going to|gonna) drink tonight\\?$")
+    val commandRegex = Regex("how many whiteclaws (am I|is .*) (going to|gonna) drink( tonight)?\\?$")
 
     override fun EnhancedEventListener.run() {
         commandSet.command("how many whiteclaws") {

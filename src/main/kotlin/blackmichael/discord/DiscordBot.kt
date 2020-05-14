@@ -6,6 +6,7 @@ import blackmichael.discord.command.classifier.subjectClassifierCommand
 import blackmichael.discord.command.helpCommand
 import blackmichael.discord.command.pingPongCommand
 import blackmichael.discord.command.sourceCodeCommand
+import blackmichael.discord.command.whiteClawsCommand
 import com.jessecorbett.diskord.dsl.Bot
 import com.jessecorbett.diskord.dsl.commands
 import java.io.Closeable
@@ -35,7 +36,8 @@ class DiscordBot(val config: Config) : Closeable {
             val commands: List<Command> = listOf(
                 pingPongCommand(this),
                 subjectClassifierCommand(this, config.botId),
-                sourceCodeCommand(this, config.sourceCode)
+                sourceCodeCommand(this, config.sourceCode),
+                whiteClawsCommand(this)
             )
 
             commands.forEach { it.listen() }

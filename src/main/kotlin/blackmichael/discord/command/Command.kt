@@ -3,7 +3,7 @@ package blackmichael.discord.command
 import com.jessecorbett.diskord.dsl.CommandSet
 import com.jessecorbett.diskord.util.EnhancedEventListener
 
-abstract class Command(val eventListener: EnhancedEventListener, protected val commandSet: CommandSet) {
+abstract class Command(private val eventListener: EnhancedEventListener, protected val commandSet: CommandSet) {
     data class Definition(
         val name: String,
         val description: String,

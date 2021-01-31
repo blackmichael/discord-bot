@@ -6,7 +6,7 @@ import io.github.config4k.extract
 import kotlin.system.exitProcess
 import kotlinx.coroutines.runBlocking
 
-fun main() {
+suspend fun main() {
     val config = ConfigFactory.load()
     val bot = DiscordBot(config.extract("bot"))
     val server = SimpleServer(config.extract("server"))
@@ -27,9 +27,7 @@ fun main() {
             exitProcess(0)
         })
 
-        runBlocking {
-            start()
-        }
+        start()
     } catch (e: Exception) {
         println(e)
         exitProcess(1)

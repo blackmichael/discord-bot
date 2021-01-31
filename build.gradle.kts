@@ -34,7 +34,7 @@ dependencies {
     implementation(kotlin("stdlib"))
 
     implementation("io.ktor:ktor-server-netty:1.3.2")
-    implementation("com.jessecorbett:diskord:1.6.2")
+    implementation("com.jessecorbett:diskord:1.7.3")
     implementation("io.github.config4k:config4k:0.4.1")
 
     implementation("org.slf4j:slf4j-api:1.7.30")

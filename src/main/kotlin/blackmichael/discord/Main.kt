@@ -4,7 +4,6 @@ import blackmichael.discord.server.SimpleServer
 import com.typesafe.config.ConfigFactory
 import io.github.config4k.extract
 import kotlin.system.exitProcess
-import kotlinx.coroutines.runBlocking
 
 suspend fun main() {
     val config = ConfigFactory.load()

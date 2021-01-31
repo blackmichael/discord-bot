@@ -17,7 +17,7 @@ import java.io.Closeable
 class DiscordBot(val config: Config) : Closeable {
     data class Config(
         val token: String,
-        val prefix: String,
+        val prefixes: List<String>,
         val botId: String,
         val sourceCode: SourceCode.Config
     )
@@ -25,17 +25,17 @@ class DiscordBot(val config: Config) : Closeable {
     private val log = LoggerFactory.getLogger(javaClass)
 
     private val bot = Bot(config.token).apply {
-        commands(config.prefix) {
+        commands("") {
             val commands: List<Command> = listOf(
-                pingPongCommand(this),
-                subjectClassifierCommand(this, config.botId),
-                sourceCodeCommand(this, config.sourceCode),
-                whiteClawsCommand(this),
-                echoCommand(this)
+                pingPongCommand(this, config.prefixes),
+                subjectClassifierCommand(this, config.prefixes, config.botId),
+                sourceCodeCommand(this, config.prefixes, config.sourceCode),
+                whiteClawsCommand(this, config.prefixes),
+                echoCommand(this, config.prefixes)
             )
 
             commands.forEach { it.listen() }
-            helpCommand(this, commands).listen()
+            helpCommand(this, config.prefixes, commands).listen()
         }
     }
 

@@ -1,11 +1,12 @@
 package blackmichael.discord.command
 
+import com.jessecorbett.diskord.api.model.Message
 import com.jessecorbett.diskord.dsl.Bot
 import com.jessecorbett.diskord.dsl.CommandSet
-import com.jessecorbett.diskord.dsl.command
 import com.jessecorbett.diskord.util.EnhancedEventListener
 
-class PingPong(eventListener: EnhancedEventListener, commandSet: CommandSet) : Command(eventListener, commandSet) {
+class PingPong(eventListener: EnhancedEventListener, commandSet: CommandSet, prefixes: List<String>) :
+    Command(eventListener, commandSet, prefixes, "ping") {
 
     override val definition = Definition(
         name = "Ping Pong",
@@ -13,11 +14,9 @@ class PingPong(eventListener: EnhancedEventListener, commandSet: CommandSet) : C
         usage = "ping"
     )
 
-    override fun EnhancedEventListener.run() {
-        commandSet.command("ping") {
-            reply("PONG")
-        }
+    override suspend fun EnhancedEventListener.action(message: Message) {
+        message.reply("PONG")
     }
 }
 
-fun Bot.pingPongCommand(cmdSet: CommandSet): Command = PingPong(this, cmdSet)
+fun Bot.pingPongCommand(cmdSet: CommandSet, prefixes: List<String>): Command = PingPong(this, cmdSet, prefixes)

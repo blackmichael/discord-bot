@@ -1,9 +1,16 @@
 package blackmichael.discord.command
 
+import com.jessecorbett.diskord.api.model.Message
 import com.jessecorbett.diskord.dsl.CommandSet
+import com.jessecorbett.diskord.dsl.command
 import com.jessecorbett.diskord.util.EnhancedEventListener
 
-abstract class Command(private val eventListener: EnhancedEventListener, protected val commandSet: CommandSet) {
+abstract class Command(
+    private val eventListener: EnhancedEventListener,
+    protected val commandSet: CommandSet,
+    private val prefixes: List<String>,
+    private val commandText: String
+) {
     data class Definition(
         val name: String,
         val description: String,
@@ -12,7 +19,14 @@ abstract class Command(private val eventListener: EnhancedEventListener, protect
 
     abstract val definition: Definition
 
-    abstract fun EnhancedEventListener.run()
+    abstract suspend fun EnhancedEventListener.action(message: Message)
 
-    fun listen() = eventListener.run()
+    fun listen() =
+        eventListener.apply {
+            prefixes.forEach { prefix ->
+                commandSet.command("$prefix$commandText") {
+                    action(this)
+                }
+            }
+        }
 }

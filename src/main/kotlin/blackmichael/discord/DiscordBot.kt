@@ -10,9 +10,9 @@ import blackmichael.discord.command.sourceCodeCommand
 import blackmichael.discord.command.whiteClawsCommand
 import com.jessecorbett.diskord.dsl.Bot
 import com.jessecorbett.diskord.dsl.commands
+import java.io.Closeable
 import kotlinx.coroutines.runBlocking
 import org.slf4j.LoggerFactory
-import java.io.Closeable
 
 class DiscordBot(val config: Config) : Closeable {
     data class Config(

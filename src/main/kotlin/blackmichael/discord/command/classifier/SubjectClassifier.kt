@@ -27,17 +27,18 @@ class SubjectClassifier(
     )
 
     override suspend fun EnhancedEventListener.action(message: Message) {
-        val isPotatoClassifier = message.content.removePrefix("${commandSet.prefix}is ").contains("potato")
-        val isHobbyClassifier = message.content.removePrefix("${commandSet.prefix}is ").contains("hobby")
+        val content = message.content.indexOf("is ").let { message.content.substring(it + 3) }
+        val isPotatoClassifier = content.contains("potato")
+        val isHobbyClassifier = content.contains("hobby")
         when {
             isPotatoClassifier -> {
-                val subject = message.content.removePrefix("${commandSet.prefix}is ")
+                val subject = content
                     .removeSuffix("a potato?")
                     .trim()
                 message.reply(PotatoClassifier(botId).getMessage(subject))
             }
             isHobbyClassifier -> {
-                val subject = message.content.removePrefix("${commandSet.prefix}is ")
+                val subject = content
                     .removeSuffix("a hobby?")
                     .trim()
                 message.reply(HobbyClassifier().getMessage(subject))

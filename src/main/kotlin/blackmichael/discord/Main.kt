@@ -1,5 +1,6 @@
 package blackmichael.discord
 
+import blackmichael.discord.io.covid.CovidDataService
 import blackmichael.discord.server.SimpleServer
 import com.typesafe.config.ConfigFactory
 import io.github.config4k.extract
@@ -7,7 +8,8 @@ import kotlin.system.exitProcess
 
 suspend fun main() {
     val config = ConfigFactory.load()
-    val bot = DiscordBot(config.extract("bot"))
+    val covidDataService = CovidDataService(config.extract("covidService"))
+    val bot = DiscordBot(config.extract("bot"), covidDataService)
     val server = SimpleServer(config.extract("server"))
 
     suspend fun start() {
@@ -17,6 +19,7 @@ suspend fun main() {
 
     fun close() {
         bot.close()
+        covidDataService.close()
         server.close()
     }
 

@@ -10,10 +10,14 @@ import blackmichael.discord.command.pingPongCommand
 import blackmichael.discord.command.sourceCodeCommand
 import blackmichael.discord.command.whiteClawsCommand
 import blackmichael.discord.io.covid.CovidDataService
+import com.jessecorbett.diskord.api.model.Message
 import com.jessecorbett.diskord.dsl.Bot
 import com.jessecorbett.diskord.dsl.commands
+import com.jessecorbett.diskord.util.sendMessage
 import java.io.Closeable
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withContext
 import org.slf4j.LoggerFactory
 
 class DiscordBot(private val config: Config, private val covidDataService: CovidDataService) : Closeable {
@@ -24,7 +28,9 @@ class DiscordBot(private val config: Config, private val covidDataService: Covid
         val sourceCode: SourceCode.Config
     )
 
-    private val log = LoggerFactory.getLogger(javaClass)
+    companion object {
+        private val log = LoggerFactory.getLogger(this::class.java)
+    }
 
     private val bot = Bot(config.token).apply {
         commands("") {
@@ -42,8 +48,14 @@ class DiscordBot(private val config: Config, private val covidDataService: Covid
         }
     }
 
+    suspend fun sendMessage(channelId: String, message: String): Message =
+        withContext(Dispatchers.IO) {
+            bot.clientStore.channels[channelId].sendMessage(message)
+        }
+
     suspend fun start() {
         log.info("starting discord bot")
+        // todo probably should run this in a background job
         bot.start()
     }
 

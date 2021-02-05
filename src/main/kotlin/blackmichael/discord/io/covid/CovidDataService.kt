@@ -9,6 +9,8 @@ import io.ktor.http.HttpStatusCode
 import java.io.Closeable
 import java.io.IOException
 import java.time.LocalDate
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Element
 
@@ -24,7 +26,9 @@ class CovidDataService(private val config: Config) : Closeable {
     }
 
     suspend fun getMinnesotaCovidData(): CovidData {
-        val response = client.get<HttpResponse>(config.url)
+        val response = withContext(Dispatchers.IO) {
+            client.get<HttpResponse>(config.url)
+        }
         return when (response.status) {
             HttpStatusCode.OK -> parseHtmlPage(response.readText())
 

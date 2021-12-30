@@ -26,14 +26,6 @@ data class CovidData(
     override fun toString(): String = """
         _${date.month.name.toLowerCase().capitalize()} ${date.dayOfMonth}, ${date.year} Update_
         
-        Positive cases: 
-            $newPositiveCases new cases (${getPercentage(newPositiveCases, newTests)}% of new tests)
-            $totalPositiveCases total
-        
-        Tests: 
-            $newTests new tests
-            $totalTests total
-        
         Hospitalizations: 
             $newHospitalizations new hospitalizations ($newIcuHospitalizations in ICU)
             $totalHospitalizations total (${getPercentage(totalHospitalizations, totalPositiveCases)}% of total cases)

@@ -1,7 +1,7 @@
+.git
 .env
 .env.*
-!.env.example
-.tools/
-bin/
+.tools
+bin
 /potatobot
 coverage.out

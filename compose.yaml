@@ -1,0 +1,12 @@
+services:
+  potatobot:
+    build: .
+    env_file: .env
+    restart: unless-stopped
+    init: true
+    read_only: true
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    stop_grace_period: 20s

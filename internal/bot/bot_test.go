@@ -6,6 +6,7 @@ import (
 	"io"
 	"log/slog"
 	"net/http"
+	"reflect"
 	"strings"
 	"sync/atomic"
 	"testing"
@@ -153,8 +154,8 @@ func TestHandleReplies(t *testing.T) {
 			type contextKey struct{}
 			b, _ := testBot(t, routerFunc(func(ctx context.Context, req command.Request) (string, error) {
 				routes.Add(1)
-				want := command.Request{Input: "help", AuthorID: "author", GuildID: "guild", ChannelID: "channel", MessageID: "message"}
-				if req != want {
+				want := command.Request{Input: "help", AuthorID: "author", GuildID: "guild", ChannelID: "channel", MessageID: "message", BotID: "123"}
+				if !reflect.DeepEqual(req, want) {
 					t.Errorf("router request = %+v, want %+v", req, want)
 				}
 				if deadline, ok := ctx.Deadline(); !ok || time.Until(deadline) > time.Minute || ctx.Err() != nil {

@@ -20,6 +20,7 @@ Ask a question after mentioning the bot:
 @PotatoBot does a sweet potato count as a potato?
 @PotatoBot is my laptop a potato?
 @PotatoBot are you a potato?
+@PotatoBot is @Someone a potato?
 ```
 
 Jev first routes the request to the `potato` command, then evaluates a typed
@@ -34,6 +35,21 @@ get a local, snarky **100%** answer without any TypeSafe calls. This is a known
 persona fact, not a model estimate. Jev's instructions also include the fact
 for other phrasings. Mentioning PotatoBot while asking about a laptop or another
 bot does not make that other subject a potato.
+
+**Tagged Discord users get a sticky random verdict.** A real user mention after
+the PotatoBot activation tag, such as `@PotatoBot is @Someone a potato?` or just
+`@PotatoBot @Someone`, runs locally without TypeSafe calls. Each user has a 50/50
+chance of being declared a potato on first use. The verdict and exact snarky
+reply are cached by Discord user ID, so they remain the same across channels,
+servers, nickname changes, and subsequent requests until the bot process restarts.
+Restarts and deployments wipe the cache; there is no database or disk storage.
+
+Multiple tagged users each get their own verdict. Only real user mentions in
+the text after the first PotatoBot tag count; role tags, `@everyone`, plain
+typed names, and user mentions before that tag do not. A subsequent mention of
+PotatoBot itself always gets its known 100% potato verdict instead of a random
+assignment. Replies identify the targets but suppress additional notification pings.
+User verdicts are a randomized joke, not an AI assessment or probability estimate.
 
 Replies are randomly selected from three snarky answers in each probability
 band and include the model's potato probability:
@@ -141,6 +157,10 @@ no model questions are evaluated.
 Recognized direct PotatoBot self-questions likewise log local dispatch and a
 `potato evaluated` record with `source=known_fact` and probability `1`, without
 a model or TypeSafe request ID.
+Tagged-user checks log `user potato evaluated` with `source=sticky_random`,
+`target_user_id`, `is_potato`, and `cached`, along with the input and Discord
+context. The first assignment has `cached=false`; subsequent checks have
+`cached=true`. No model metadata is attached to these local random verdicts.
 The `potato evaluated` record includes the same Discord context, potato
 probability, response band, model, and TypeSafe request ID.
 
@@ -150,9 +170,9 @@ logs. `TYPESAFE_LOG_LEVEL=off` only disables SDK logs, not the bot's payload
 logs. Tokens are not included in the bot's request records, but text users
 provide is logged verbatim, so secrets pasted into a request will be logged.
 
-Except for local `help` and recognized direct PotatoBot self-questions, the text
-after a mention is sent to TypeSafe. The bot
-does not send or log prior conversation history or attachments as context.
+Except for local `help`, tagged-user checks, and recognized direct PotatoBot
+self-questions, the text after a mention is sent to TypeSafe. The bot does not
+send or log prior conversation history or attachments as context.
 
 ## Run Locally
 
@@ -181,9 +201,9 @@ Command{
 }
 ```
 
-Except for local exact-`help` and recognized direct self-questions, the router
-builds a typed Jev `Choice` question from the registered commands and a reserved
-`unknown` option.
+Except for local exact-`help`, tagged-user checks, and recognized direct
+self-questions, the router builds a typed Jev `Choice` question from the
+registered commands and a reserved `unknown` option.
 It only dispatches a registered handler when the
 answer meets the confidence threshold. Handlers receive the full trimmed text
 after the first bot mention, along with the author, guild, channel, and message
@@ -206,8 +226,7 @@ go build ./cmd/potatobot
 
 Race tests require CGO and a C compiler. Tests use fake Discord transports and
 a local HTTP server for the real TypeSafe client; they do not require tokens
-or make paid API calls. The Docker build runs the tests before producing the
-static binary.
+or make paid API calls. The Docker build only produces the static binary.
 
 | Path | Responsibility |
 | --- | --- |

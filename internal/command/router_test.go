@@ -94,7 +94,7 @@ func TestRouterWithTypeSafeClient(t *testing.T) {
 			ctx := context.WithValue(context.Background(), contextKey{}, "value")
 			router, err := NewRouter(client, []Command{{Name: "test", Description: "Run the test handler", Handle: func(handlerCtx context.Context, got Request) (string, error) {
 				called = true
-				if got != req || handlerCtx.Value(contextKey{}) != "value" {
+				if !reflect.DeepEqual(got, req) || handlerCtx.Value(contextKey{}) != "value" {
 					t.Errorf("handler lost request or context: %+v", got)
 				}
 				return "handler reply", nil
@@ -200,7 +200,7 @@ func TestHelpShortcut(t *testing.T) {
 			commands := DefaultCommands(client, testLogger())
 			commands[0].Handle = func(gotCtx context.Context, got Request) (string, error) {
 				calledHandler = true
-				if got != req || gotCtx.Value(contextKey{}) != "value" {
+				if !reflect.DeepEqual(got, req) || gotCtx.Value(contextKey{}) != "value" {
 					t.Errorf("handler lost context or request: %+v", got)
 				}
 				return "help reply", wantErr

@@ -3,6 +3,7 @@ package bot
 import (
 	"context"
 	"log/slog"
+	"slices"
 	"strings"
 	"sync"
 	"time"
@@ -81,9 +82,18 @@ func (b *Bot) respond(msg *discordgo.Message, input string) {
 	response := "Write a request after my mention. Try `@PotatoBot help`."
 	if input != "" {
 		var err error
-		response, err = b.router.Route(ctx, command.Request{
-			Input: input, AuthorID: msg.Author.ID, GuildID: msg.GuildID, ChannelID: msg.ChannelID, MessageID: msg.ID,
-		})
+		req := command.Request{
+			Input: input, AuthorID: msg.Author.ID, GuildID: msg.GuildID, ChannelID: msg.ChannelID, MessageID: msg.ID, BotID: b.id,
+		}
+		for _, user := range msg.Mentions {
+			if user == nil || user.ID == "" || slices.Contains(req.MentionedUserIDs, user.ID) {
+				continue
+			}
+			if strings.Contains(input, "<@"+user.ID+">") || strings.Contains(input, "<@!"+user.ID+">") {
+				req.MentionedUserIDs = append(req.MentionedUserIDs, user.ID)
+			}
+		}
+		response, err = b.router.Route(ctx, req)
 		if err != nil {
 			b.logger.Error("request failed", "message_id", msg.ID, "error", err)
 			response = "I couldn't process that request right now. Please try again shortly."

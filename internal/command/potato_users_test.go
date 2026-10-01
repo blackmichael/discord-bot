@@ -20,8 +20,8 @@ func TestTaggedUserVerdictsAreSticky(t *testing.T) {
 		}
 		req := Request{Input: "is <@123> a potato?", AuthorID: "author", GuildID: "guild", ChannelID: "channel", BotID: "999", MentionedUserIDs: []string{"123"}}
 		first, err := router.Route(context.Background(), req)
-		if err != nil || !strings.HasPrefix(first, "<@123>: ") || (!strings.Contains(first, "**Yes**") && !strings.Contains(first, "**No**")) {
-			t.Fatalf("random user verdict: reply=%q err=%v", first, err)
+		if err != nil || !strings.HasPrefix(first, "<@123>: ") || !strings.Contains(first, "\n\nPotato probability: ") || strings.Contains(first, "Potato verdict:") {
+			t.Fatalf("tagged user format: reply=%q err=%v", first, err)
 		}
 		req.Input, req.AuthorID, req.GuildID, req.ChannelID = "what about <@!123>?", "other-author", "other-guild", "other-channel"
 		second, err := router.Route(context.Background(), req)
@@ -40,9 +40,10 @@ func TestTaggedUserVerdictsAreSticky(t *testing.T) {
 			if dispatch["source"] != "local" || verdict["source"] != "sticky_random" || verdict["target_user_id"] != "123" || verdict["cached"] != cached {
 				t.Errorf("sticky assignment log = %+v", verdict)
 			}
-			potato, ok := verdict["is_potato"].(bool)
-			if !ok || potato != strings.Contains(first, "**Yes**") || verdict["model"] != nil || verdict["request_id"] != nil {
-				t.Errorf("random verdict must agree with its reply, not claim a model result: %+v", verdict)
+			potato, potatoOK := verdict["is_potato"].(bool)
+			probability, probabilityOK := verdict["potato_probability"].(float64)
+			if !potatoOK || !probabilityOK || (potato && probability < taggedUserPotatoChance) || (!potato && probability >= 1-taggedUserPotatoChance) || verdict["model"] != nil || verdict["request_id"] != nil {
+				t.Errorf("random verdict must use a matching probability, not claim a model result: %+v", verdict)
 			}
 		}
 	}
@@ -58,7 +59,10 @@ func TestTaggedUsersAndPotatoBot(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	parts := strings.Split(reply, "\n\n")
+	parts := strings.Split(reply, "\n\n<@")
+	for i := 1; i < len(parts); i++ {
+		parts[i] = "<@" + parts[i]
+	}
 	if len(parts) != 3 {
 		t.Fatalf("expected one answer per unique user: %q", reply)
 	}

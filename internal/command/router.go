@@ -71,7 +71,7 @@ func (r *Router) Route(ctx context.Context, req Request) (string, error) {
 			return cmd.Handle(ctx, req)
 		}
 	}
-	if potatoBotQuestion.MatchString(req.Input) || len(req.MentionedUserIDs) > 0 {
+	if potatoBotQuestion.MatchString(req.Input) || potatoBotFamilyQuestion.MatchString(req.Input) || len(req.MentionedUserIDs) > 0 {
 		if cmd, ok := r.commands["potato"]; ok {
 			logger.InfoContext(ctx, "request dispatched", "command", "potato", "source", "local", "state", req.Input)
 			return cmd.Handle(ctx, req)

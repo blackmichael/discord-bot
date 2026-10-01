@@ -73,6 +73,34 @@ func TestPotatoBotSelfQuestions(t *testing.T) {
 	}
 }
 
+func TestPotatoBotFamilyQuestions(t *testing.T) {
+	for _, input := range []string{
+		"is your mom a potato?",
+		"is your dad really a potato?",
+		"is PotatoBot's brother an actual potato?",
+		"are PotatoBot's parents potatoes?",
+	} {
+		t.Run(input, func(t *testing.T) {
+			calls := 0
+			client := clientFunc(func(context.Context, typesafe.Request) (*typesafe.Response, error) {
+				calls++
+				return nil, errors.New("TypeSafe unavailable")
+			})
+			router, err := NewRouter(client, DefaultCommands(client, testLogger()), 1, testLogger())
+			if err != nil {
+				t.Fatal(err)
+			}
+			reply, err := router.Route(context.Background(), Request{Input: input})
+			if err != nil || calls != 0 || !strings.HasSuffix(reply, "\n\nPotato probability: 100.0%.") {
+				t.Fatalf("family verdict: reply=%q calls=%d err=%v", reply, calls, err)
+			}
+			if !slices.Contains(potatoResponses[0].replies, strings.TrimSuffix(reply, "\n\nPotato probability: 100.0%.")) {
+				t.Errorf("family verdict should use a certain potato response: %q", reply)
+			}
+		})
+	}
+}
+
 func TestOtherSubjectsDoNotInheritPotatoBotIdentity(t *testing.T) {
 	for _, input := range []string{
 		"PotatoBot, is my laptop a potato?",

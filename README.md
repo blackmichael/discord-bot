@@ -35,13 +35,15 @@ get a local, snarky **100%** answer without any TypeSafe calls. This is a known
 persona fact, not a model estimate. Jev's instructions also include the fact
 for other phrasings. Mentioning PotatoBot while asking about a laptop or another
 bot does not make that other subject a potato.
+PotatoBot's family members, such as its mom, dad, and brother, are also
+considered potatoes and receive a local 100% answer.
 
 **Tagged Discord users get a sticky random verdict.** A real user mention after
 the PotatoBot activation tag, such as `@PotatoBot is @Someone a potato?` or just
-`@PotatoBot @Someone`, runs locally without TypeSafe calls. Each user has a 50/50
-chance of being declared a potato on first use. The verdict and exact snarky
-reply are cached by Discord user ID, so they remain the same across channels,
-servers, nickname changes, and subsequent requests until the bot process restarts.
+`@PotatoBot @Someone`, runs locally without TypeSafe calls. Each user has a 65%
+chance of being declared a potato on first use. The verdict, probability, and
+exact snarky reply are cached by Discord user ID, so they remain the same across
+channels, servers, nickname changes, and subsequent requests until the bot process restarts.
 Restarts and deployments wipe the cache; there is no database or disk storage.
 
 Multiple tagged users each get their own verdict. Only real user mentions in
@@ -49,10 +51,11 @@ the text after the first PotatoBot tag count; role tags, `@everyone`, plain
 typed names, and user mentions before that tag do not. A subsequent mention of
 PotatoBot itself always gets its known 100% potato verdict instead of a random
 assignment. Replies identify the targets but suppress additional notification pings.
-User verdicts are a randomized joke, not an AI assessment or probability estimate.
+User verdicts are a randomized joke, not an AI assessment; their displayed
+probability is chosen to match the verdict.
 
 Replies are randomly selected from three snarky answers in each probability
-band and include the model's potato probability:
+band and include the potato probability:
 
 | Potato Probability | Tone |
 | --- | --- |

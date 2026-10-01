@@ -40,8 +40,8 @@ considered potatoes and receive a local 100% answer.
 
 **Tagged Discord users get a sticky random verdict.** A real user mention after
 the PotatoBot activation tag, such as `@PotatoBot is @Someone a potato?` or just
-`@PotatoBot @Someone`, runs locally without TypeSafe calls. Each user has a 65%
-chance of being declared a potato on first use. The verdict, probability, and
+`@PotatoBot @Someone`, runs locally without TypeSafe calls. Ordinary users have
+a 65% chance of being declared a potato on first use. The verdict, probability, and
 exact snarky reply are cached by Discord user ID, so they remain the same across
 channels, servers, nickname changes, and subsequent requests until the bot process restarts.
 Restarts and deployments wipe the cache; there is no database or disk storage.
@@ -51,7 +51,7 @@ the text after the first PotatoBot tag count; role tags, `@everyone`, plain
 typed names, and user mentions before that tag do not. A subsequent mention of
 PotatoBot itself always gets its known 100% potato verdict instead of a random
 assignment. Replies identify the targets but suppress additional notification pings.
-User verdicts are a randomized joke, not an AI assessment; their displayed
+Random user verdicts are a joke, not an AI assessment; their displayed
 probability is chosen to match the verdict.
 
 Replies are randomly selected from three snarky answers in each probability

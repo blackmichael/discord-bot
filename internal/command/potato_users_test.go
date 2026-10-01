@@ -80,3 +80,32 @@ func TestTaggedUsersAndPotatoBot(t *testing.T) {
 		t.Fatalf("each user must keep its own answer: reply=%q err=%v", again, err)
 	}
 }
+
+func TestAlwaysPotatoUsers(t *testing.T) {
+	ids := []string{"314389700179918850", "314475455057231882", "323955224979177472"}
+	router, err := NewRouter(nil, DefaultCommands(nil, testLogger()), 1, testLogger())
+	if err != nil {
+		t.Fatal(err)
+	}
+	req := Request{Input: "judge these users", MentionedUserIDs: ids}
+	reply, err := router.Route(context.Background(), req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	parts := strings.Split(reply, "\n\n<@")
+	for i := 1; i < len(parts); i++ {
+		parts[i] = "<@" + parts[i]
+	}
+	if len(parts) != len(ids) {
+		t.Fatalf("expected one answer per override: %q", reply)
+	}
+	for i, id := range ids {
+		if !strings.HasPrefix(parts[i], "<@"+id+">: ") || !strings.Contains(parts[i], "Potato probability: 100.0%.") {
+			t.Errorf("override reply = %q", parts[i])
+		}
+	}
+	again, err := router.Route(context.Background(), req)
+	if err != nil || again != reply {
+		t.Fatalf("override reply changed: first=%q second=%q err=%v", reply, again, err)
+	}
+}

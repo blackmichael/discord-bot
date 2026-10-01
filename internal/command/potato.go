@@ -33,6 +33,12 @@ var potatoBotReplies = []string{
 
 const taggedUserPotatoChance = 0.65
 
+var alwaysPotatoUserIDs = map[string]struct{}{
+	"314389700179918850": {},
+	"314475455057231882": {},
+	"323955224979177472": {},
+}
+
 var potatoResponses = []struct {
 	minProbability float64
 	band           string
@@ -104,6 +110,20 @@ func potatoCommand(client Client, logger *slog.Logger) Command {
 					if id == req.BotID {
 						requestLogger.InfoContext(ctx, "potato evaluated", "state", req.Input, "target_user_id", id, "potato_probability", 1.0, "band", "almost_certainly_potato", "source", "known_fact")
 						replies = append(replies, fmt.Sprintf("<@%s>: %s", id, formatPotatoReply(potatoBotReplies[rand.IntN(len(potatoBotReplies))], 1)))
+						continue
+					}
+					if _, ok := alwaysPotatoUserIDs[id]; ok {
+						usersMu.Lock()
+						verdict, cached := users[id]
+						if !cached {
+							verdict.potato = true
+							verdict.probability = 1
+							verdict.reply = fmt.Sprintf("<@%s>: %s", id, formatPotatoReply(potatoResponses[0].replies[rand.IntN(len(potatoResponses[0].replies))], 1))
+							users[id] = verdict
+						}
+						usersMu.Unlock()
+						requestLogger.InfoContext(ctx, "potato evaluated", "state", req.Input, "target_user_id", id, "potato_probability", verdict.probability, "band", "almost_certainly_potato", "source", "known_fact", "cached", cached)
+						replies = append(replies, verdict.reply)
 						continue
 					}
 					// Assign the verdict and reply atomically, so concurrent first requests agree.

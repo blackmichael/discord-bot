@@ -300,12 +300,12 @@ func TestPotatoRouteWithTypeSafeClient(t *testing.T) {
 				w.Header().Set("X-TypeSafe-Request-Id", "route-123")
 				if call == 1 {
 					q := payload.Questions["command"]
-					if q.Type != "choice" || q.Instructions == "" || len(q.Criteria) != 3 || q.Criteria["help"] == "" || q.Criteria["unknown"] == "" || !strings.Contains(q.Criteria["potato"], "potato-based food") {
+					if q.Type != "choice" || q.Instructions == "" || len(q.Criteria) != 4 || q.Criteria["help"] == "" || q.Criteria["unknown"] == "" || q.Criteria["opinion"] == "" || !strings.Contains(q.Criteria["potato"], "potato-based food") {
 						t.Errorf("potato not registered as a Choice option: %+v", q)
 					}
 					_ = json.NewEncoder(w).Encode(map[string]any{"model": "jev-test", "answers": map[string]any{"command": map[string]any{
 						"type": "choice", "choice": tt.choice, "confidence": tt.confidence,
-						"probabilities": map[string]float64{"potato": 0.9, "help": 0.05, "unknown": 0.05},
+						"probabilities": map[string]float64{"potato": 0.9, "opinion": 0.01, "help": 0.04, "unknown": 0.05},
 					}}})
 					return
 				}

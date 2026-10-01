@@ -166,8 +166,8 @@ func TestCommandRegistration(t *testing.T) {
 		}
 	}
 	commands := DefaultCommands(nil, testLogger())
-	if len(commands) != 2 || commands[0].Name != "help" || commands[1].Name != "potato" {
-		t.Fatalf("expected help and potato commands: %+v", commands)
+	if len(commands) != 3 || commands[0].Name != "help" || commands[1].Name != "potato" || commands[2].Name != "opinion" {
+		t.Fatalf("expected help, potato, and opinion commands: %+v", commands)
 	}
 	reply, err := commands[0].Handle(context.Background(), Request{})
 	if err != nil || !strings.Contains(reply, "@PotatoBot") {
@@ -214,6 +214,25 @@ func TestHelpShortcut(t *testing.T) {
 				t.Fatalf("API=%v handler=%v reply=%q err=%v", calledAPI, calledHandler, reply, err)
 			}
 		})
+	}
+}
+
+func TestParentContentDispatchesOpinion(t *testing.T) {
+	called := false
+	router, err := NewRouter(nil, []Command{{
+		Name:        "opinion",
+		Description: "Analyze an opinion",
+		Handle: func(context.Context, Request) (string, error) {
+			called = true
+			return "opinion reply", nil
+		},
+	}}, 0.7, testLogger())
+	if err != nil {
+		t.Fatal(err)
+	}
+	reply, err := router.Route(context.Background(), Request{ParentContent: "the post"})
+	if err != nil || reply != "opinion reply" || !called {
+		t.Fatalf("parent dispatch: reply=%q err=%v called=%v", reply, err, called)
 	}
 }
 

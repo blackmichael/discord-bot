@@ -22,6 +22,10 @@ type Discord interface {
 	ChannelMessageSendComplex(string, *discordgo.MessageSend, ...discordgo.RequestOption) (*discordgo.Message, error)
 }
 
+type discordMessageFetcher interface {
+	ChannelMessage(string, string, ...discordgo.RequestOption) (*discordgo.Message, error)
+}
+
 type Bot struct {
 	ctx     context.Context
 	id      string
@@ -80,10 +84,29 @@ func (b *Bot) respond(msg *discordgo.Message, input string) {
 	ctx, cancel := context.WithTimeout(b.ctx, b.timeout)
 	defer cancel()
 	response := "Write a request after my mention. Try `@PotatoBot help`."
-	if input != "" {
+	parent := msg.ReferencedMessage
+	if (parent == nil || strings.TrimSpace(parent.Content) == "") && msg.MessageReference != nil && msg.MessageReference.MessageID != "" {
+		if fetcher, ok := b.discord.(discordMessageFetcher); ok {
+			channelID := msg.ChannelID
+			if msg.MessageReference.ChannelID != "" {
+				channelID = msg.MessageReference.ChannelID
+			}
+			fetched, err := fetcher.ChannelMessage(channelID, msg.MessageReference.MessageID, discordgo.WithContext(ctx))
+			if err != nil {
+				b.logger.Warn("referenced message fetch failed", "message_id", msg.ID, "referenced_message_id", msg.MessageReference.MessageID, "error", err)
+			} else if fetched != nil {
+				parent = fetched
+			}
+		}
+	}
+	parentContent := ""
+	if parent != nil {
+		parentContent = strings.TrimSpace(parent.Content)
+	}
+	if input != "" || parentContent != "" {
 		var err error
 		req := command.Request{
-			Input: input, AuthorID: msg.Author.ID, GuildID: msg.GuildID, ChannelID: msg.ChannelID, MessageID: msg.ID, BotID: b.id,
+			Input: input, ParentContent: parentContent, AuthorID: msg.Author.ID, GuildID: msg.GuildID, ChannelID: msg.ChannelID, MessageID: msg.ID, BotID: b.id,
 		}
 		for _, user := range msg.Mentions {
 			if user == nil || user.ID == "" || slices.Contains(req.MentionedUserIDs, user.ID) {

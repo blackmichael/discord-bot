@@ -5,7 +5,7 @@ A small Go Discord bot that uses [Jev](https://typesafe.ai) through
 classify natural-language requests and select a Go command handler.
 
 Mention the bot with a request, such as `@PotatoBot what can you do?`.
-Commands include `help` and a snarky potato check; unsupported or uncertain
+Commands include `help`, a snarky potato check, and hot-take judgments; unsupported or uncertain
 routing requests get a fallback response. Jev chooses logic to run, not a
 generated chat answer.
 Exact `help` (case-insensitive, with surrounding whitespace ignored) runs
@@ -72,6 +72,19 @@ For example: "No. The potato community has declined its application."
 The yes/no score is the probability of **potato**, not a separate confidence
 score. A value near 50% is uncertain; a value near 0% is a confident negative.
 This is separate from the routing confidence controlled by `BOT_MIN_CONFIDENCE`.
+
+## Hot Takes
+
+Give PotatoBot an opinion after mentioning it, or reply to a text post while
+mentioning it:
+
+```text
+@PotatoBot I don't think Taylor Swift is that good
+```
+
+It returns a short right, wrong, or mixed verdict and a 1-to-10 heat rating.
+Reply analysis uses the text of the referenced post; images and attachments are
+not evaluated.
 
 ## Discord Setup
 
@@ -146,8 +159,8 @@ Bot and TypeSafe client logs are newline-delimited JSON on stdout. Set
 include HTTP request/response bodies and headers. SDK records have
 `"component":"typesafe"`; the SDK redacts credential headers.
 
-At the default `LOG_LEVEL=info`, the bot logs a `classifying request` or
-`evaluating potato` record **before each TypeSafe call**, including:
+At the default `LOG_LEVEL=info`, the bot logs a `classifying request`,
+`evaluating potato`, or `evaluating opinion` record **before each TypeSafe call**, including:
 
 - `state`: the full trimmed text after the bot mention, exactly as sent to Jev.
 - `questions`: structured question instructions and command-option descriptions, exactly as sent to Jev.
@@ -166,6 +179,8 @@ context. The first assignment has `cached=false`; subsequent checks have
 `cached=true`. No model metadata is attached to these local random verdicts.
 The `potato evaluated` record includes the same Discord context, potato
 probability, response band, model, and TypeSafe request ID.
+Opinion evaluations likewise log an `opinion evaluated` record with the verdict,
+heat score, model, and TypeSafe request ID.
 
 **These logs contain users' input and Discord IDs.** Restrict access and choose
 appropriate retention. `LOG_LEVEL=warn` or `error` suppresses request-payload
@@ -173,9 +188,10 @@ logs. `TYPESAFE_LOG_LEVEL=off` only disables SDK logs, not the bot's payload
 logs. Tokens are not included in the bot's request records, but text users
 provide is logged verbatim, so secrets pasted into a request will be logged.
 
-Except for local `help`, tagged-user checks, and recognized direct PotatoBot
-self-questions, the text after a mention is sent to TypeSafe. The bot does not
-send or log prior conversation history or attachments as context.
+Except for local `help`, tagged-user checks, recognized direct PotatoBot
+self-questions, and reply routing, the text after a mention is sent to
+TypeSafe. Reply analysis sends the referenced post text as context. The bot
+does not send or log unrelated conversation history or attachments as context.
 
 ## Run Locally
 

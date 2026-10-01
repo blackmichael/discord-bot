@@ -44,3 +44,50 @@ func TestTaggedUserMetadata(t *testing.T) {
 		})
 	}
 }
+
+func TestReferencedMessageMetadata(t *testing.T) {
+	var got command.Request
+	router := routerFunc(func(_ context.Context, req command.Request) (string, error) {
+		got = req
+		return "", nil
+	})
+	b := New(context.Background(), "123", nil, router, slog.New(slog.NewTextHandler(io.Discard, nil)), time.Second, 1)
+	event := testMessage("<@123>")
+	event.Message.ReferencedMessage = &discordgo.Message{Content: "the post to judge"}
+	input, _ := MentionInput(event.Content, "123")
+	b.respond(event.Message, input)
+	if got.Input != "" || got.ParentContent != "the post to judge" {
+		t.Fatalf("reply metadata: input=%q parent=%q", got.Input, got.ParentContent)
+	}
+}
+
+type fetchDiscord struct {
+	discordFunc
+	parent *discordgo.Message
+}
+
+func (d fetchDiscord) ChannelMessage(string, string, ...discordgo.RequestOption) (*discordgo.Message, error) {
+	return d.parent, nil
+}
+
+func TestReferencedMessageFetch(t *testing.T) {
+	var got command.Request
+	router := routerFunc(func(_ context.Context, req command.Request) (string, error) {
+		got = req
+		return "", nil
+	})
+	discord := fetchDiscord{
+		discordFunc: discordFunc(func(string, *discordgo.MessageSend, ...discordgo.RequestOption) (*discordgo.Message, error) {
+			return nil, nil
+		}),
+		parent: &discordgo.Message{Content: "fetched post to judge"},
+	}
+	b := New(context.Background(), "123", discord, router, slog.New(slog.NewTextHandler(io.Discard, nil)), time.Second, 1)
+	event := testMessage("<@123>")
+	event.Message.MessageReference = &discordgo.MessageReference{ChannelID: "channel", MessageID: "parent"}
+	input, _ := MentionInput(event.Content, "123")
+	b.respond(event.Message, input)
+	if got.ParentContent != "fetched post to judge" {
+		t.Fatalf("fetched reply metadata: parent=%q", got.ParentContent)
+	}
+}

@@ -10,14 +10,16 @@ import (
 	typesafe "github.com/haileyok/typesafe-client/go"
 )
 
-// Request contains only the text after the mention, plus Discord context for handlers.
+// Request contains user text, optional replied-to text, and Discord context for handlers.
 type Request struct {
-	Input     string
-	AuthorID  string
-	GuildID   string
-	ChannelID string
-	MessageID string
-	BotID     string
+	Input string
+	// ParentContent is the text of the Discord message being replied to, when available.
+	ParentContent string
+	AuthorID      string
+	GuildID       string
+	ChannelID     string
+	MessageID     string
+	BotID         string
 	// MentionedUserIDs contains real Discord user mentions in Input, without duplicates.
 	MentionedUserIDs []string
 }
@@ -68,6 +70,12 @@ func (r *Router) Route(ctx context.Context, req Request) (string, error) {
 	if strings.EqualFold(strings.TrimSpace(req.Input), "help") {
 		if cmd, ok := r.commands["help"]; ok {
 			logger.InfoContext(ctx, "request dispatched", "command", "help", "source", "local", "state", req.Input)
+			return cmd.Handle(ctx, req)
+		}
+	}
+	if strings.TrimSpace(req.ParentContent) != "" {
+		if cmd, ok := r.commands["opinion"]; ok {
+			logger.InfoContext(ctx, "request dispatched", "command", "opinion", "source", "local", "state", req.ParentContent)
 			return cmd.Handle(ctx, req)
 		}
 	}

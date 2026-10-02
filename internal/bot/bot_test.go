@@ -202,9 +202,8 @@ func TestHandleReplies(t *testing.T) {
 			if msg.Content != tt.want {
 				t.Errorf("reply content = %q, want %q", msg.Content, tt.want)
 			}
-			ref := msg.Reference
-			if ref == nil || ref.MessageID != "message" || ref.ChannelID != "channel" || ref.GuildID != "guild" || ref.FailIfNotExists == nil || *ref.FailIfNotExists {
-				t.Errorf("reply reference = %+v", ref)
+			if msg.Reference != nil {
+				t.Errorf("standalone message has reply reference = %+v", msg.Reference)
 			}
 			mentions := msg.AllowedMentions
 			if mentions == nil || mentions.Parse == nil || len(mentions.Parse) != 0 || len(mentions.Users) != 0 || len(mentions.Roles) != 0 || mentions.RepliedUser {
@@ -214,7 +213,7 @@ func TestHandleReplies(t *testing.T) {
 	}
 }
 
-func TestHandleRepliesToReferencedMessage(t *testing.T) {
+func TestHandleDoesNotReplyToReferencedMessage(t *testing.T) {
 	replies := make(chan *discordgo.MessageSend, 1)
 	b, _ := testBot(t, routerFunc(func(_ context.Context, req command.Request) (string, error) {
 		if req.ParentContent != "message A" {
@@ -232,8 +231,8 @@ func TestHandleRepliesToReferencedMessage(t *testing.T) {
 	b.respond(event.Message, "opinion")
 
 	reply := receive(t, replies)
-	if reply.Reference == nil || reply.Reference.MessageID != "message-a" || reply.Reference.ChannelID != "channel" || reply.Reference.GuildID != "guild" {
-		t.Fatalf("reply reference = %+v", reply.Reference)
+	if reply.Reference != nil {
+		t.Fatalf("standalone message has reply reference = %+v", reply.Reference)
 	}
 }
 

@@ -42,8 +42,18 @@ func TestOpinionAnalysis(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
-			if reply != "Verdict: right.\n\nHeat: 7.3/10 (spicy)." {
+			if !strings.HasSuffix(reply, "\n\nHeat: 7.3/10 (spicy take).") {
 				t.Fatalf("reply = %q", reply)
+			}
+			matched := false
+			for _, candidate := range opinionVerdictReplies["right"] {
+				if strings.HasPrefix(reply, candidate+"\n\n") {
+					matched = true
+					break
+				}
+			}
+			if !matched {
+				t.Fatalf("reply has no right-verdict flavor: %q", reply)
 			}
 		})
 	}
@@ -63,7 +73,7 @@ func TestOpinionMissingState(t *testing.T) {
 
 func TestOpinionRejectsInvalidAnswers(t *testing.T) {
 	for _, answer := range []typesafe.Answer{
-		typesafe.ChoiceAnswer{Choice: "maybe"},
+		typesafe.ChoiceAnswer{Choice: "mixed"},
 		typesafe.ChoiceAnswer{Choice: "right"},
 	} {
 		t.Run(answer.Type(), func(t *testing.T) {
@@ -86,10 +96,31 @@ func TestOpinionHeatLabels(t *testing.T) {
 		heat float64
 		want string
 	}{
-		{1, "mild"}, {3, "warm"}, {5, "hot"}, {7, "spicy"}, {9, "nuclear"},
+		{1, "mild take"}, {3, "warm take"}, {5, "hot take"}, {7, "spicy take"}, {9, "nuclear take"},
 	} {
 		if got := opinionHeatLabel(tt.heat); got != tt.want {
 			t.Errorf("opinionHeatLabel(%v) = %q, want %q", tt.heat, got, tt.want)
 		}
+	}
+}
+
+func TestOpinionVerdictFlavors(t *testing.T) {
+	for _, verdict := range []string{"right", "wrong", "maybe"} {
+		t.Run(verdict, func(t *testing.T) {
+			reply := formatOpinionReply(verdict, 7)
+			if !strings.HasSuffix(reply, "\n\nHeat: 7.0/10 (spicy take).") {
+				t.Fatalf("reply = %q", reply)
+			}
+			matched := false
+			for _, candidate := range opinionVerdictReplies[verdict] {
+				if strings.HasPrefix(reply, candidate+"\n\n") {
+					matched = true
+					break
+				}
+			}
+			if !matched {
+				t.Fatalf("reply has no %s flavor: %q", verdict, reply)
+			}
+		})
 	}
 }

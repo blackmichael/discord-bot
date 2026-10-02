@@ -191,5 +191,5 @@ func potatoCommand(client Client, logger *slog.Logger) Command {
 }
 
 func formatPotatoReply(reply string, probability float64) string {
-	return fmt.Sprintf("%s\n\npotato probability: %.1f%%.", reply, probability*100)
+	return fmt.Sprintf("%s\n\npotato probability: %.1f%%", reply, probability*100)
 }

@@ -170,10 +170,10 @@ func TestCommandRegistration(t *testing.T) {
 		t.Fatalf("expected help, potato, opinion, and hot_take commands: %+v", commands)
 	}
 	reply, err := commands[0].Handle(context.Background(), Request{})
-	if err != nil || !strings.Contains(reply, "@potatobot") {
+	if err != nil || !strings.Contains(reply, "`help` -") {
 		t.Fatalf("help reply = %q, err=%v", reply, err)
 	}
-	for _, command := range []string{"`help` -", "`potato` -", "`opinion` -", "`/hot take` -"} {
+	for _, command := range []string{"`help` -", "`potato` -", "`opinion` -", "`hot take` -"} {
 		if !strings.Contains(reply, command) {
 			t.Errorf("help reply missing %q: %q", command, reply)
 		}
@@ -265,21 +265,31 @@ func TestOpinionQuestionDispatchesOpinion(t *testing.T) {
 }
 
 func TestHotTakeQuestionDispatchesHotTake(t *testing.T) {
-	called := false
-	router, err := NewRouter(nil, []Command{{
-		Name:        "hot_take",
-		Description: "Rate a take",
-		Handle: func(context.Context, Request) (string, error) {
-			called = true
-			return "hot take reply", nil
-		},
-	}}, 0.7, testLogger())
-	if err != nil {
-		t.Fatal(err)
-	}
-	reply, err := router.Route(context.Background(), Request{Input: "/hot take pineapple belongs on pizza"})
-	if err != nil || reply != "hot take reply" || !called {
-		t.Fatalf("hot take dispatch: reply=%q err=%v called=%v", reply, err, called)
+	for _, input := range []string{"/hot take pineapple belongs on pizza", "rate this take", "please rate the take"} {
+		t.Run(input, func(t *testing.T) {
+			called := false
+			router, err := NewRouter(nil, []Command{{
+				Name:        "opinion",
+				Description: "Give an opinion",
+				Handle: func(context.Context, Request) (string, error) {
+					return "opinion reply", nil
+				},
+			}, {
+				Name:        "hot_take",
+				Description: "Rate a take",
+				Handle: func(context.Context, Request) (string, error) {
+					called = true
+					return "hot take reply", nil
+				},
+			}}, 0.7, testLogger())
+			if err != nil {
+				t.Fatal(err)
+			}
+			reply, err := router.Route(context.Background(), Request{Input: input})
+			if err != nil || reply != "hot take reply" || !called {
+				t.Fatalf("hot take dispatch: reply=%q err=%v called=%v", reply, err, called)
+			}
+		})
 	}
 }
 

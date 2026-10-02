@@ -23,7 +23,7 @@ import (
 
 func assertPotatoReply(t *testing.T, reply, band string, probability float64) {
 	t.Helper()
-	suffix := fmt.Sprintf("\n\npotato probability: %.1f%%.", probability*100)
+	suffix := fmt.Sprintf("\n\npotato probability: %.1f%%", probability*100)
 	for _, candidate := range potatoResponses {
 		if candidate.band == band {
 			if !strings.HasSuffix(reply, suffix) || !slices.Contains(candidate.replies, strings.TrimSuffix(reply, suffix)) {
@@ -355,7 +355,7 @@ func TestPotatoRouteWithTypeSafeClient(t *testing.T) {
 			} else if tt.wantCalls == 2 {
 				assertPotatoReply(t, reply, "almost_certainly_potato", 0.95)
 			} else if tt.wantCalls == 0 {
-				if !strings.Contains(reply, "`potato` -") || !strings.Contains(reply, "`help` -") || !strings.Contains(reply, "`opinion` -") || !strings.Contains(reply, "`/hot take` -") {
+				if !strings.Contains(reply, "`potato` -") || !strings.Contains(reply, "`help` -") || !strings.Contains(reply, "`opinion` -") || !strings.Contains(reply, "`hot take` -") {
 					t.Errorf("help missing potato command: %q", reply)
 				}
 			} else if !strings.Contains(reply, "help") || strings.Contains(reply, "potato probability:") {

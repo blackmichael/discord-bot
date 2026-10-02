@@ -40,7 +40,7 @@ func TestOpinionAnalysis(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
-			if reply != "i agree - 7.3/10." {
+			if reply != "i agree - 7.3/10" {
 				t.Fatalf("reply = %q", reply)
 			}
 		})

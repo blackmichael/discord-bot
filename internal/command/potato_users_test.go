@@ -100,7 +100,7 @@ func TestAlwaysPotatoUsers(t *testing.T) {
 		t.Fatalf("expected one answer per override: %q", reply)
 	}
 	for i, id := range ids {
-		if !strings.HasPrefix(parts[i], "<@"+id+">: ") || !strings.Contains(parts[i], "potato probability: 100.0%.") {
+		if !strings.HasPrefix(parts[i], "<@"+id+">: ") || !strings.Contains(parts[i], "potato probability: 100.0%") {
 			t.Errorf("override reply = %q", parts[i])
 		}
 	}

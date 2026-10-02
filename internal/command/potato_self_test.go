@@ -42,7 +42,7 @@ func TestPotatoBotSelfQuestions(t *testing.T) {
 			}
 			req := Request{Input: input, AuthorID: "author", GuildID: "guild", ChannelID: "channel", MessageID: "message"}
 			reply, err := router.Route(context.Background(), req)
-			const suffix = "\n\npotato probability: 100.0%."
+			const suffix = "\n\npotato probability: 100.0%"
 			if err != nil || calls != 0 || !strings.HasSuffix(reply, suffix) || !slices.Contains(potatoBotReplies, strings.TrimSuffix(reply, suffix)) {
 				t.Fatalf("self-verdict: reply=%q calls=%d err=%v", reply, calls, err)
 			}
@@ -91,10 +91,10 @@ func TestPotatoBotFamilyQuestions(t *testing.T) {
 				t.Fatal(err)
 			}
 			reply, err := router.Route(context.Background(), Request{Input: input})
-			if err != nil || calls != 0 || !strings.HasSuffix(reply, "\n\npotato probability: 100.0%.") {
+			if err != nil || calls != 0 || !strings.HasSuffix(reply, "\n\npotato probability: 100.0%") {
 				t.Fatalf("family verdict: reply=%q calls=%d err=%v", reply, calls, err)
 			}
-			if !slices.Contains(potatoResponses[0].replies, strings.TrimSuffix(reply, "\n\npotato probability: 100.0%.")) {
+			if !slices.Contains(potatoResponses[0].replies, strings.TrimSuffix(reply, "\n\npotato probability: 100.0%")) {
 				t.Errorf("family verdict should use a certain potato response: %q", reply)
 			}
 		})

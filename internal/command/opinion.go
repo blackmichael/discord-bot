@@ -38,7 +38,7 @@ var hotTakeHeatLevels = []string{
 }
 
 var opinionQuestion = regexp.MustCompile(`(?i)^\s*(?:what\s+do\s+you\s+think|do\s+you\s+think)\b`)
-var hotTakeQuestion = regexp.MustCompile(`(?i)^\s*/?\s*hot\s+take\b`)
+var hotTakeQuestion = regexp.MustCompile(`(?i)^\s*(?:/?\s*hot\s+take|(?:(?:can|could)\s+you\s+|please\s+)?rate\s+(?:(?:this|the|that|my|your|a)\s+)?(?:hot\s+)?(?:take|opinion))\b`)
 
 func opinionCommand(client Client, logger *slog.Logger) Command {
 	questions := typesafe.Questions{

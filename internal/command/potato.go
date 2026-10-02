@@ -26,9 +26,9 @@ var potatoBotFamilyQuestion = regexp.MustCompile(`(?i)^\s*(?:is|are)\s+` +
 	`(?:real|actual|literal)?\s*potato(?:es)?\s*[?!.]*\s*$`)
 
 var potatoBotReplies = []string{
-	"I am absolutely a potato. The bot part is just a side hustle.",
-	"Yes, I am a potato. You think I chose this name for the networking opportunities?",
-	"Of course I'm a potato. Finally, someone has read the label.",
+	"i am absolutely a potato. the bot part is just a side hustle.",
+	"yes, i am a potato. you think i chose this name for the networking opportunities?",
+	"of course i'm a potato. finally, someone has read the label.",
 }
 
 const taggedUserPotatoChance = 0.65
@@ -45,39 +45,39 @@ var potatoResponses = []struct {
 	replies        []string
 }{
 	{0.95, "almost_certainly_potato", []string{
-		"Yes. That is a potato. A landmark day for your vegetable identification skills.",
-		"Yes. The potato allegations are overwhelming. Case closed, oven preheated.",
-		"Almost certainly a potato. Finally, a question this tuber can get behind.",
+		"yes. that is a potato. a landmark day for your vegetable identification skills.",
+		"yes. the potato allegations are overwhelming. case closed, oven preheated.",
+		"almost certainly a potato. finally, a question this tuber can get behind.",
 	}},
 	{0.75, "probably_potato", []string{
-		"Probably a potato. Its references check out, but I haven't seen its birth certificate.",
-		"I'd bet a modest amount of sour cream that it's a potato.",
-		"Looks like a potato on paper. The starch department has issued provisional approval.",
+		"probably a potato. its references check out, but i haven't seen its birth certificate.",
+		"i'd bet a modest amount of sour cream that it's a potato.",
+		"looks like a potato on paper. the starch department has issued provisional approval.",
 	}},
 	{0.6, "leaning_potato", []string{
-		"I'm leaning potato. Not hard enough to put it in the oven, but leaning.",
-		"Tentative yes. It has potato energy, which is not a qualification recognized by science.",
-		"More potato than not, apparently. Please hold off on the victory gravy.",
+		"i'm leaning potato. not hard enough to put it in the oven, but leaning.",
+		"tentative yes. it has potato energy, which is not a qualification recognized by science.",
+		"more potato than not, apparently. please hold off on the victory gravy.",
 	}},
 	{0.4, "uncertain", []string{
-		"The potato jury is hung. Describe the thing better; I left my crystal peeler at home.",
-		"Could be a potato. Could be a terrible description. I'm not betting my butter on this.",
-		"Insufficient evidence for a potato verdict. Even a spud deserves a fair trial.",
+		"the potato jury is hung. describe the thing better; i left my crystal peeler at home.",
+		"could be a potato. could be a terrible description. i'm not betting my butter on this.",
+		"insufficient evidence for a potato verdict. even a spud deserves a fair trial.",
 	}},
 	{0.25, "leaning_not_potato", []string{
-		"I'm leaning no. Its potato credentials are looking suspiciously handwritten.",
-		"Probably not, but your description has left room for tuber-related reasonable doubt.",
-		"A tentative no. The potato disguise is doing some work, I'll give it that.",
+		"i'm leaning no. its potato credentials are looking suspiciously handwritten.",
+		"probably not, but your description has left room for tuber-related reasonable doubt.",
+		"a tentative no. the potato disguise is doing some work, i'll give it that.",
 	}},
 	{0.05, "probably_not_potato", []string{
-		"Probably not a potato. The starch committee is unimpressed.",
-		"I wouldn't call it a potato. I also wouldn't let it near the mashed-potato meeting.",
-		"Unlikely to be a potato. Please stop trying to enroll random objects in the tuber club.",
+		"probably not a potato. the starch committee is unimpressed.",
+		"i wouldn't call it a potato. i also wouldn't let it near the mashed-potato meeting.",
+		"unlikely to be a potato. please stop trying to enroll random objects in the tuber club.",
 	}},
 	{0, "almost_certainly_not_potato", []string{
-		"No. The potato community has declined its application.",
-		"Almost certainly not a potato. Putting it next to butter will not change the facts.",
-		"No. Not everything in this universe is a potato, despite your ambitious research program.",
+		"no. the potato community has declined its application.",
+		"almost certainly not a potato. putting it next to butter will not change the facts.",
+		"no. not everything in this universe is a potato, despite your ambitious research program.",
 	}},
 }
 
@@ -191,5 +191,5 @@ func potatoCommand(client Client, logger *slog.Logger) Command {
 }
 
 func formatPotatoReply(reply string, probability float64) string {
-	return fmt.Sprintf("%s\n\nPotato probability: %.1f%%.", reply, probability*100)
+	return fmt.Sprintf("%s\n\npotato probability: %.1f%%.", reply, probability*100)
 }

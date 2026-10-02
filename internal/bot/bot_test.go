@@ -139,10 +139,10 @@ func TestHandleReplies(t *testing.T) {
 		err                           error
 		routes                        int32
 	}{
-		{"request", "prefix <@!123> \thelp\n", "hello @everyone <@999>", "hello @everyone <@999>", nil, 1},
-		{"empty", "<@123>", "unused", "Write a request after my mention. Try `@PotatoBot help`.", nil, 0},
-		{"whitespace", "<@!123> \n\t", "unused", "Write a request after my mention. Try `@PotatoBot help`.", nil, 0},
-		{"failure", "<@123> help", "unsafe partial reply", "I couldn't process that request right now. Please try again shortly.", errors.New("secret upstream failure"), 1},
+		{"request", "prefix <@!123> \thelp\n", "Hello @Everyone <@999>", "hello @everyone <@999>", nil, 1},
+		{"empty", "<@123>", "unused", "write a request after my mention. try `@potatobot help`.", nil, 0},
+		{"whitespace", "<@!123> \n\t", "unused", "write a request after my mention. try `@potatobot help`.", nil, 0},
+		{"failure", "<@123> help", "unsafe partial reply", "i couldn't process that request right now. please try again shortly.", errors.New("secret upstream failure"), 1},
 		{"empty response", "<@123> help", "", "", nil, 1},
 		{"blank response", "<@123> help", " \n\t", "", nil, 1},
 		{"long ASCII", "<@123> help", strings.Repeat("a", 2001), strings.Repeat("a", 1997) + "...", nil, 1},
@@ -226,7 +226,7 @@ func TestRequestDeadlineAllowsSafeReply(t *testing.T) {
 		for _, opt := range opts {
 			opt(cfg)
 		}
-		if msg.Content != "I couldn't process that request right now. Please try again shortly." {
+		if msg.Content != "i couldn't process that request right now. please try again shortly." {
 			t.Errorf("timeout reply = %q", msg.Content)
 		}
 		replied <- cfg.Request.Context().Err()

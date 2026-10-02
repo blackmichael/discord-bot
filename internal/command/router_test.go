@@ -166,14 +166,14 @@ func TestCommandRegistration(t *testing.T) {
 		}
 	}
 	commands := DefaultCommands(nil, testLogger())
-	if len(commands) != 3 || commands[0].Name != "help" || commands[1].Name != "potato" || commands[2].Name != "opinion" {
-		t.Fatalf("expected help, potato, and opinion commands: %+v", commands)
+	if len(commands) != 4 || commands[0].Name != "help" || commands[1].Name != "potato" || commands[2].Name != "opinion" || commands[3].Name != "hot_take" {
+		t.Fatalf("expected help, potato, opinion, and hot_take commands: %+v", commands)
 	}
 	reply, err := commands[0].Handle(context.Background(), Request{})
-	if err != nil || !strings.Contains(reply, "@PotatoBot") {
+	if err != nil || !strings.Contains(reply, "@potatobot") {
 		t.Fatalf("help reply = %q, err=%v", reply, err)
 	}
-	for _, command := range []string{"`help` -", "`potato` -", "`opinion` -"} {
+	for _, command := range []string{"`help` -", "`potato` -", "`opinion` -", "`/hot take` -"} {
 		if !strings.Contains(reply, command) {
 			t.Errorf("help reply missing %q: %q", command, reply)
 		}
@@ -261,6 +261,25 @@ func TestOpinionQuestionDispatchesOpinion(t *testing.T) {
 				t.Fatalf("opinion question dispatch: reply=%q err=%v called=%v", reply, err, called)
 			}
 		})
+	}
+}
+
+func TestHotTakeQuestionDispatchesHotTake(t *testing.T) {
+	called := false
+	router, err := NewRouter(nil, []Command{{
+		Name:        "hot_take",
+		Description: "Rate a take",
+		Handle: func(context.Context, Request) (string, error) {
+			called = true
+			return "hot take reply", nil
+		},
+	}}, 0.7, testLogger())
+	if err != nil {
+		t.Fatal(err)
+	}
+	reply, err := router.Route(context.Background(), Request{Input: "/hot take pineapple belongs on pizza"})
+	if err != nil || reply != "hot take reply" || !called {
+		t.Fatalf("hot take dispatch: reply=%q err=%v called=%v", reply, err, called)
 	}
 }
 

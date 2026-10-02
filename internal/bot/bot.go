@@ -83,7 +83,7 @@ func (b *Bot) Stop() {
 func (b *Bot) respond(msg *discordgo.Message, input string) {
 	ctx, cancel := context.WithTimeout(b.ctx, b.timeout)
 	defer cancel()
-	response := "Write a request after my mention. Try `@PotatoBot help`."
+	response := "write a request after my mention. try `@potatobot help`."
 	parent := msg.ReferencedMessage
 	if (parent == nil || strings.TrimSpace(parent.Content) == "") && msg.MessageReference != nil && msg.MessageReference.MessageID != "" {
 		if fetcher, ok := b.discord.(discordMessageFetcher); ok {
@@ -119,7 +119,7 @@ func (b *Bot) respond(msg *discordgo.Message, input string) {
 		response, err = b.router.Route(ctx, req)
 		if err != nil {
 			b.logger.Error("request failed", "message_id", msg.ID, "error", err)
-			response = "I couldn't process that request right now. Please try again shortly."
+			response = "i couldn't process that request right now. please try again shortly."
 		}
 	}
 	if b.ctx.Err() != nil || strings.TrimSpace(response) == "" {
@@ -129,7 +129,7 @@ func (b *Bot) respond(msg *discordgo.Message, input string) {
 	replyCtx, replyCancel := context.WithTimeout(b.ctx, 10*time.Second)
 	defer replyCancel()
 	_, err := b.discord.ChannelMessageSendComplex(msg.ChannelID, &discordgo.MessageSend{
-		Content:         limitReply(response),
+		Content:         limitReply(strings.ToLower(response)),
 		Reference:       &discordgo.MessageReference{MessageID: msg.ID, ChannelID: msg.ChannelID, GuildID: msg.GuildID, FailIfNotExists: new(false)},
 		AllowedMentions: &discordgo.MessageAllowedMentions{Parse: []discordgo.AllowedMentionType{}, RepliedUser: false},
 	}, discordgo.WithContext(replyCtx))

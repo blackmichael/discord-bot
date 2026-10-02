@@ -73,6 +73,12 @@ func (r *Router) Route(ctx context.Context, req Request) (string, error) {
 			return cmd.Handle(ctx, req)
 		}
 	}
+	if hotTakeQuestion.MatchString(req.Input) {
+		if cmd, ok := r.commands["hot_take"]; ok {
+			logger.InfoContext(ctx, "request dispatched", "command", "hot_take", "source", "local", "state", req.Input)
+			return cmd.Handle(ctx, req)
+		}
+	}
 	if strings.TrimSpace(req.ParentContent) != "" {
 		if cmd, ok := r.commands["opinion"]; ok {
 			logger.InfoContext(ctx, "request dispatched", "command", "opinion", "source", "local", "state", req.ParentContent)
@@ -106,7 +112,7 @@ func (r *Router) Route(ctx context.Context, req Request) (string, error) {
 	}
 	logger.InfoContext(ctx, "request classified", "command", answer.Choice, "confidence", answer.Confidence, "model", resp.Model, "request_id", resp.RequestID)
 	if answer.Choice == "unknown" || answer.Confidence < r.minConfidence {
-		return "I don't have a command for that yet, or I'm not sure what you mean. Tag me with `help` to see what's available.", nil
+		return "i don't have a command for that yet, or i'm not sure what you mean. tag me with `help` to see what's available.", nil
 	}
 	cmd, ok := r.commands[answer.Choice]
 	if !ok {

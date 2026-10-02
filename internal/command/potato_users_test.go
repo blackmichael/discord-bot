@@ -20,7 +20,7 @@ func TestTaggedUserVerdictsAreSticky(t *testing.T) {
 		}
 		req := Request{Input: "is <@123> a potato?", AuthorID: "author", GuildID: "guild", ChannelID: "channel", BotID: "999", MentionedUserIDs: []string{"123"}}
 		first, err := router.Route(context.Background(), req)
-		if err != nil || !strings.HasPrefix(first, "<@123>: ") || !strings.Contains(first, "\n\nPotato probability: ") || strings.Contains(first, "Potato verdict:") {
+		if err != nil || !strings.HasPrefix(first, "<@123>: ") || !strings.Contains(first, "\n\npotato probability: ") || strings.Contains(first, "potato verdict:") {
 			t.Fatalf("tagged user format: reply=%q err=%v", first, err)
 		}
 		req.Input, req.AuthorID, req.GuildID, req.ChannelID = "what about <@!123>?", "other-author", "other-guild", "other-channel"
@@ -71,7 +71,7 @@ func TestTaggedUsersAndPotatoBot(t *testing.T) {
 			t.Errorf("wrong target: %q", parts[i])
 		}
 	}
-	if !strings.Contains(parts[1], "100.0%") || strings.Contains(parts[1], "Randomly assigned") {
+	if !strings.Contains(parts[1], "100.0%") || strings.Contains(parts[1], "randomly assigned") {
 		t.Errorf("PotatoBot must remain a known potato: %q", parts[1])
 	}
 	req.MentionedUserIDs = []string{"456", "123"}
@@ -100,7 +100,7 @@ func TestAlwaysPotatoUsers(t *testing.T) {
 		t.Fatalf("expected one answer per override: %q", reply)
 	}
 	for i, id := range ids {
-		if !strings.HasPrefix(parts[i], "<@"+id+">: ") || !strings.Contains(parts[i], "Potato probability: 100.0%.") {
+		if !strings.HasPrefix(parts[i], "<@"+id+">: ") || !strings.Contains(parts[i], "potato probability: 100.0%.") {
 			t.Errorf("override reply = %q", parts[i])
 		}
 	}

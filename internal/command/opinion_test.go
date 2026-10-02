@@ -22,19 +22,17 @@ func TestOpinionAnalysis(t *testing.T) {
 				if evaluation.State != tt.wantState {
 					t.Fatalf("state = %q, want %q", evaluation.State, tt.wantState)
 				}
-				verdictQuestion, ok := evaluation.Questions["verdict"].(typesafe.ChoiceQuestion)
-				if !ok || len(verdictQuestion.Criteria) != 3 {
-					t.Fatalf("verdict question = %+v", evaluation.Questions["verdict"])
+				agreementQuestion, ok := evaluation.Questions["agreement"].(typesafe.ScoreQuestion)
+				if !ok || len(agreementQuestion.Criteria) != len(opinionAgreementLevels) {
+					t.Fatalf("agreement question = %+v", evaluation.Questions["agreement"])
 				}
-				heatQuestion, ok := evaluation.Questions["spiciness"].(typesafe.ScoreQuestion)
-				if !ok || len(heatQuestion.Criteria) != len(opinionHeatLevels) {
-					t.Fatalf("spiciness question = %+v", evaluation.Questions["spiciness"])
+				if _, ok := evaluation.Questions["spiciness"]; ok {
+					t.Fatal("opinion evaluation must not rate spiciness")
 				}
 				return &typesafe.Response{
 					Model: "jev-test", RequestID: "opinion-123",
 					Answers: map[string]typesafe.Answer{
-						"verdict":   typesafe.ChoiceAnswer{Choice: "right", Confidence: 0.8},
-						"spiciness": typesafe.ScoreAnswer{Score: 6.3},
+						"agreement": typesafe.ScoreAnswer{Score: 6.3},
 					},
 				}, nil
 			})
@@ -42,20 +40,32 @@ func TestOpinionAnalysis(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
-			if !strings.HasSuffix(reply, "\n\nHeat: 7.3/10 (spicy take).") {
+			if reply != "i agree - 7.3/10." {
 				t.Fatalf("reply = %q", reply)
 			}
-			matched := false
-			for _, candidate := range opinionVerdictReplies["right"] {
-				if strings.HasPrefix(reply, candidate+"\n\n") {
-					matched = true
-					break
-				}
-			}
-			if !matched {
-				t.Fatalf("reply has no right-verdict flavor: %q", reply)
-			}
 		})
+	}
+}
+
+func TestHotTakeAnalysis(t *testing.T) {
+	client := clientFunc(func(_ context.Context, evaluation typesafe.Request) (*typesafe.Response, error) {
+		if evaluation.State != "I don't think Taylor Swift is that good" {
+			t.Fatalf("state = %q", evaluation.State)
+		}
+		spiciness, ok := evaluation.Questions["spiciness"].(typesafe.ScoreQuestion)
+		if !ok || len(spiciness.Criteria) != len(hotTakeHeatLevels) {
+			t.Fatalf("spiciness question = %+v", evaluation.Questions["spiciness"])
+		}
+		if _, ok := evaluation.Questions["agreement"]; ok {
+			t.Fatal("hot take evaluation must not rate agreement")
+		}
+		return &typesafe.Response{Answers: map[string]typesafe.Answer{
+			"spiciness": typesafe.ScoreAnswer{Score: 7.3},
+		}}, nil
+	})
+	reply, err := hotTakeCommand(client, testLogger()).Handle(context.Background(), Request{Input: "/hot take I don't think Taylor Swift is that good"})
+	if err != nil || reply != "spicy take - 8.3/10" {
+		t.Fatalf("reply = %q, err=%v", reply, err)
 	}
 }
 
@@ -66,69 +76,73 @@ func TestOpinionMissingState(t *testing.T) {
 		return nil, nil
 	})
 	reply, err := opinionCommand(client, testLogger()).Handle(context.Background(), Request{Input: " \t", ParentContent: "\n"})
-	if err != nil || called || !strings.Contains(reply, "reply to one") {
+	if err != nil || called || reply != "give me an opinion to judge, or reply to one and tag me." {
 		t.Fatalf("missing opinion = %q, err=%v, called=%v", reply, err, called)
+	}
+	reply, err = hotTakeCommand(client, testLogger()).Handle(context.Background(), Request{Input: "/hot take"})
+	if err != nil || called || reply != "give me a take to rate, or reply to one and tag me." {
+		t.Fatalf("missing hot take = %q, err=%v, called=%v", reply, err, called)
 	}
 }
 
 func TestOpinionRejectsInvalidAnswers(t *testing.T) {
 	for _, answer := range []typesafe.Answer{
-		typesafe.ChoiceAnswer{Choice: "mixed"},
+		typesafe.ScoreAnswer{Score: math.NaN()},
 		typesafe.ChoiceAnswer{Choice: "right"},
 	} {
 		t.Run(answer.Type(), func(t *testing.T) {
 			client := clientFunc(func(context.Context, typesafe.Request) (*typesafe.Response, error) {
-				return &typesafe.Response{Answers: map[string]typesafe.Answer{
-					"verdict":   answer,
-					"spiciness": typesafe.ScoreAnswer{Score: math.NaN()},
-				}}, nil
+				return &typesafe.Response{Answers: map[string]typesafe.Answer{"agreement": answer}}, nil
 			})
 			reply, err := opinionCommand(client, testLogger()).Handle(context.Background(), Request{Input: "this is a take"})
-			if err == nil || reply != "" || !strings.HasPrefix(err.Error(), "evaluate opinion:") {
+			if err == nil || reply != "" || !strings.HasPrefix(err.Error(), "evaluate opinion: invalid agreement") {
 				t.Fatalf("reply=%q err=%v", reply, err)
 			}
 		})
 	}
 }
 
-func TestOpinionHeatLabels(t *testing.T) {
+func TestHotTakeRejectsInvalidAnswers(t *testing.T) {
+	client := clientFunc(func(context.Context, typesafe.Request) (*typesafe.Response, error) {
+		return &typesafe.Response{Answers: map[string]typesafe.Answer{"spiciness": typesafe.ScoreAnswer{Score: math.NaN()}}}, nil
+	})
+	reply, err := hotTakeCommand(client, testLogger()).Handle(context.Background(), Request{Input: "/hot take this is a take"})
+	if err == nil || reply != "" || !strings.HasPrefix(err.Error(), "evaluate hot take: invalid spiciness") {
+		t.Fatalf("reply=%q err=%v", reply, err)
+	}
+}
+
+func TestHotTakeLabels(t *testing.T) {
 	for _, tt := range []struct {
 		heat float64
 		want string
 	}{
 		{1, "mild take"}, {3, "warm take"}, {5, "hot take"}, {7, "spicy take"}, {9, "nuclear take"},
 	} {
-		if got := opinionHeatLabel(tt.heat); got != tt.want {
-			t.Errorf("opinionHeatLabel(%v) = %q, want %q", tt.heat, got, tt.want)
+		if got := hotTakeLabel(tt.heat); got != tt.want {
+			t.Errorf("hotTakeLabel(%v) = %q, want %q", tt.heat, got, tt.want)
 		}
 	}
 }
 
-func TestOpinionVerdictFlavors(t *testing.T) {
-	prefixes := map[string]string{
-		"right": "I agree.",
-		"wrong": "I disagree.",
-		"maybe": "I am undecided.",
+func TestOpinionAgreementLabels(t *testing.T) {
+	for _, tt := range []struct {
+		agreement float64
+		want      string
+	}{
+		{1, "strongly disagree"}, {3, "disagree"}, {4, "slightly disagree"}, {5, "undecided"},
+		{6, "slightly agree"}, {7, "agree"}, {9, "strongly agree"},
+	} {
+		if got := opinionAgreementLabel(tt.agreement); got != tt.want {
+			t.Errorf("opinionAgreementLabel(%v) = %q, want %q", tt.agreement, got, tt.want)
+		}
 	}
-	for _, verdict := range []string{"right", "wrong", "maybe"} {
-		t.Run(verdict, func(t *testing.T) {
-			reply := formatOpinionReply(verdict, 7)
-			if !strings.HasSuffix(reply, "\n\nHeat: 7.0/10 (spicy take).") {
-				t.Fatalf("reply = %q", reply)
-			}
-			matched := false
-			for _, candidate := range opinionVerdictReplies[verdict] {
-				if strings.HasPrefix(reply, candidate+"\n\n") {
-					matched = true
-					break
-				}
-			}
-			if !matched {
-				t.Fatalf("reply has no %s flavor: %q", verdict, reply)
-			}
-			if !strings.HasPrefix(reply, prefixes[verdict]) {
-				t.Fatalf("reply does not state PotatoBot's perspective: %q", reply)
-			}
-		})
+}
+
+func TestFormattedOpinionAndHotTakeRepliesAreLowercase(t *testing.T) {
+	for _, reply := range []string{formatOpinionReply(9.3), formatHotTakeReply(8.3)} {
+		if reply != strings.ToLower(reply) {
+			t.Errorf("reply = %q, must be lowercase", reply)
+		}
 	}
 }

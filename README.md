@@ -67,13 +67,13 @@ band and include the potato probability:
 | 75% to below 95% | Probably a potato |
 | 95% and above | Almost certainly a potato |
 
-For example: "No. The potato community has declined its application."
+For example: "no. the potato community has declined its application."
 
 The yes/no score is the probability of **potato**, not a separate confidence
 score. A value near 50% is uncertain; a value near 0% is a confident negative.
 This is separate from the routing confidence controlled by `BOT_MIN_CONFIDENCE`.
 
-## Hot Takes
+## Opinions And Hot Takes
 
 Give PotatoBot an opinion after mentioning it, or reply to a text post while
 mentioning it:
@@ -82,10 +82,17 @@ mentioning it:
 @PotatoBot I don't think Taylor Swift is that good
 ```
 
-It returns PotatoBot's short agreement, disagreement, or uncertainty, plus a
-1-to-10 heat rating.
+It returns how strongly PotatoBot agrees or disagrees on a 1-to-10 scale.
 Reply analysis uses the text of the referenced post; images and attachments are
 not evaluated.
+
+To rate the heat instead of asking for agreement, use `/hot take`:
+
+```text
+@PotatoBot /hot take I don't think Taylor Swift is that good
+```
+
+It returns a label and a 1-to-10 rating, such as `spicy take - 8.3/10`.
 
 ## Discord Setup
 
@@ -161,7 +168,7 @@ include HTTP request/response bodies and headers. SDK records have
 `"component":"typesafe"`; the SDK redacts credential headers.
 
 At the default `LOG_LEVEL=info`, the bot logs a `classifying request`,
-`evaluating potato`, or `evaluating opinion` record **before each TypeSafe call**, including:
+`evaluating potato`, `evaluating opinion`, or `evaluating hot take` record **before each TypeSafe call**, including:
 
 - `state`: the full trimmed text after the bot mention, exactly as sent to Jev.
 - `questions`: structured question instructions and command-option descriptions, exactly as sent to Jev.
@@ -180,8 +187,9 @@ context. The first assignment has `cached=false`; subsequent checks have
 `cached=true`. No model metadata is attached to these local random verdicts.
 The `potato evaluated` record includes the same Discord context, potato
 probability, response band, model, and TypeSafe request ID.
-Opinion evaluations likewise log an `opinion evaluated` record with the verdict,
-heat score, model, and TypeSafe request ID.
+Opinion evaluations log an `opinion evaluated` record with the agreement score,
+model, and TypeSafe request ID. Hot-take evaluations log a `hot take evaluated`
+record with the heat score, model, and TypeSafe request ID.
 
 **These logs contain users' input and Discord IDs.** Restrict access and choose
 appropriate retention. `LOG_LEVEL=warn` or `error` suppresses request-payload

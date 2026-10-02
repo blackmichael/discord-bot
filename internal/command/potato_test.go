@@ -23,7 +23,7 @@ import (
 
 func assertPotatoReply(t *testing.T, reply, band string, probability float64) {
 	t.Helper()
-	suffix := fmt.Sprintf("\n\nPotato probability: %.1f%%.", probability*100)
+	suffix := fmt.Sprintf("\n\npotato probability: %.1f%%.", probability*100)
 	for _, candidate := range potatoResponses {
 		if candidate.band == band {
 			if !strings.HasSuffix(reply, suffix) || !slices.Contains(candidate.replies, strings.TrimSuffix(reply, suffix)) {
@@ -300,12 +300,12 @@ func TestPotatoRouteWithTypeSafeClient(t *testing.T) {
 				w.Header().Set("X-TypeSafe-Request-Id", "route-123")
 				if call == 1 {
 					q := payload.Questions["command"]
-					if q.Type != "choice" || q.Instructions == "" || len(q.Criteria) != 4 || q.Criteria["help"] == "" || q.Criteria["unknown"] == "" || q.Criteria["opinion"] == "" || !strings.Contains(q.Criteria["potato"], "potato-based food") {
+					if q.Type != "choice" || q.Instructions == "" || len(q.Criteria) != 5 || q.Criteria["help"] == "" || q.Criteria["unknown"] == "" || q.Criteria["opinion"] == "" || q.Criteria["hot_take"] == "" || !strings.Contains(q.Criteria["potato"], "potato-based food") {
 						t.Errorf("potato not registered as a Choice option: %+v", q)
 					}
 					_ = json.NewEncoder(w).Encode(map[string]any{"model": "jev-test", "answers": map[string]any{"command": map[string]any{
 						"type": "choice", "choice": tt.choice, "confidence": tt.confidence,
-						"probabilities": map[string]float64{"potato": 0.9, "opinion": 0.01, "help": 0.04, "unknown": 0.05},
+						"probabilities": map[string]float64{"potato": 0.9, "opinion": 0.01, "hot_take": 0.01, "help": 0.04, "unknown": 0.05},
 					}}})
 					return
 				}
@@ -355,10 +355,10 @@ func TestPotatoRouteWithTypeSafeClient(t *testing.T) {
 			} else if tt.wantCalls == 2 {
 				assertPotatoReply(t, reply, "almost_certainly_potato", 0.95)
 			} else if tt.wantCalls == 0 {
-				if !strings.Contains(reply, "`potato` -") || !strings.Contains(reply, "`help` -") || !strings.Contains(reply, "`opinion` -") {
+				if !strings.Contains(reply, "`potato` -") || !strings.Contains(reply, "`help` -") || !strings.Contains(reply, "`opinion` -") || !strings.Contains(reply, "`/hot take` -") {
 					t.Errorf("help missing potato command: %q", reply)
 				}
-			} else if !strings.Contains(reply, "help") || strings.Contains(reply, "Potato probability:") {
+			} else if !strings.Contains(reply, "help") || strings.Contains(reply, "potato probability:") {
 				t.Errorf("expected fallback without evaluation: %q", reply)
 			}
 			wantMessages := []string{"classifying request", "request classified"}

@@ -132,7 +132,7 @@ func hotTakeState(req Request) string {
 }
 
 func formatOpinionReply(agreement float64) string {
-	return fmt.Sprintf("i %s - %.1f/10.", opinionAgreementLabel(agreement), agreement)
+	return fmt.Sprintf("i %s - %.1f/10", opinionAgreementLabel(agreement), agreement)
 }
 
 func opinionAgreementLabel(agreement float64) string {

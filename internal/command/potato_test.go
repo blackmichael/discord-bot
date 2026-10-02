@@ -355,7 +355,7 @@ func TestPotatoRouteWithTypeSafeClient(t *testing.T) {
 			} else if tt.wantCalls == 2 {
 				assertPotatoReply(t, reply, "almost_certainly_potato", 0.95)
 			} else if tt.wantCalls == 0 {
-				if !strings.Contains(reply, "Potato check") || !strings.Contains(reply, "`help`") {
+				if !strings.Contains(reply, "`potato` -") || !strings.Contains(reply, "`help` -") || !strings.Contains(reply, "`opinion` -") {
 					t.Errorf("help missing potato command: %q", reply)
 				}
 			} else if !strings.Contains(reply, "help") || strings.Contains(reply, "Potato probability:") {

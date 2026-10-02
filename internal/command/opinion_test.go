@@ -105,6 +105,11 @@ func TestOpinionHeatLabels(t *testing.T) {
 }
 
 func TestOpinionVerdictFlavors(t *testing.T) {
+	prefixes := map[string]string{
+		"right": "I agree.",
+		"wrong": "I disagree.",
+		"maybe": "I am undecided.",
+	}
 	for _, verdict := range []string{"right", "wrong", "maybe"} {
 		t.Run(verdict, func(t *testing.T) {
 			reply := formatOpinionReply(verdict, 7)
@@ -120,6 +125,9 @@ func TestOpinionVerdictFlavors(t *testing.T) {
 			}
 			if !matched {
 				t.Fatalf("reply has no %s flavor: %q", verdict, reply)
+			}
+			if !strings.HasPrefix(reply, prefixes[verdict]) {
+				t.Fatalf("reply does not state PotatoBot's perspective: %q", reply)
 			}
 		})
 	}

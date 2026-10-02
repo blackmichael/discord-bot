@@ -6,6 +6,7 @@ import (
 	"log/slog"
 	"math"
 	"math/rand/v2"
+	"regexp"
 	"strings"
 
 	typesafe "github.com/haileyok/typesafe-client/go"
@@ -24,20 +25,23 @@ var opinionHeatLevels = []string{
 	"10/10 - nuclear",
 }
 
+var opinionQuestion = regexp.MustCompile(`(?i)^\s*(?:what\s+do\s+you\s+think|do\s+you\s+think)\b`)
+
 var opinionVerdictReplies = map[string][]string{
 	"right": {
-		"Correct. Unfortunately.",
-		"Defensible. I have nothing useful to add.",
+		"I agree. Annoyingly, this take survived review.",
+		"I agree. The starch department has no objections.",
+		"I agree. I hate how defensible this is.",
 	},
 	"wrong": {
-		"Wrong. That take has not survived review.",
-		"No. That argument arrived underprepared.",
-		"Not buying it. The confidence is doing all the work.",
+		"I disagree. That take did not survive review.",
+		"I disagree. That argument arrived underprepared.",
+		"I disagree. The confidence is doing all the work.",
 	},
 	"maybe": {
-		"Maybe. There is a point in there somewhere.",
-		"Maybe. The argument is not completely useless.",
-		"Maybe. The premise is carrying more than it should.",
+		"I am undecided. There is a point in there somewhere.",
+		"I am undecided. The argument brought evidence and misplaced it.",
+		"I am undecided. The premise is carrying more than it should.",
 	},
 }
 

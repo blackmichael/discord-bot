@@ -82,7 +82,8 @@ mentioning it:
 @PotatoBot I don't think Taylor Swift is that good
 ```
 
-It returns a short right, wrong, or maybe verdict and a 1-to-10 heat rating.
+It returns PotatoBot's short agreement, disagreement, or uncertainty, plus a
+1-to-10 heat rating.
 Reply analysis uses the text of the referenced post; images and attachments are
 not evaluated.
 

@@ -14,8 +14,8 @@ func DefaultCommands(client Client, logger *slog.Logger) []Command {
 			Handle: func(_ context.Context, _ Request) (string, error) {
 				return "Tag me and write your request after the mention.\n\n" +
 					"`help` - Show this help without calling Jev.\n" +
-					"Potato check - Ask whether something is a potato, for example `@PotatoBot is a russet a potato?`. I'll judge it, with entirely unnecessary attitude.\n\n" +
-					"Hot take - Give me an opinion to judge, or reply to a post and tag me.\n\n" +
+					"`potato` - Ask whether something is a potato, for example `@PotatoBot is a russet a potato?`. I'll judge it, with entirely unnecessary attitude.\n" +
+					"`opinion` - Give me an opinion to judge, or reply to a post and tag me.\n\n" +
 					"Describe the subject in text; I don't inspect images or attachments.", nil
 			},
 		},

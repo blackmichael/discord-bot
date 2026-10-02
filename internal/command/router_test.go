@@ -173,6 +173,11 @@ func TestCommandRegistration(t *testing.T) {
 	if err != nil || !strings.Contains(reply, "@PotatoBot") {
 		t.Fatalf("help reply = %q, err=%v", reply, err)
 	}
+	for _, command := range []string{"`help` -", "`potato` -", "`opinion` -"} {
+		if !strings.Contains(reply, command) {
+			t.Errorf("help reply missing %q: %q", command, reply)
+		}
+	}
 }
 
 func TestHelpShortcut(t *testing.T) {
@@ -233,6 +238,29 @@ func TestParentContentDispatchesOpinion(t *testing.T) {
 	reply, err := router.Route(context.Background(), Request{ParentContent: "the post"})
 	if err != nil || reply != "opinion reply" || !called {
 		t.Fatalf("parent dispatch: reply=%q err=%v called=%v", reply, err, called)
+	}
+}
+
+func TestOpinionQuestionDispatchesOpinion(t *testing.T) {
+	for _, input := range []string{"do you think pineapple belongs on pizza?", "what do you think about this?"} {
+		t.Run(input, func(t *testing.T) {
+			called := false
+			router, err := NewRouter(nil, []Command{{
+				Name:        "opinion",
+				Description: "Analyze an opinion",
+				Handle: func(context.Context, Request) (string, error) {
+					called = true
+					return "opinion reply", nil
+				},
+			}}, 0.7, testLogger())
+			if err != nil {
+				t.Fatal(err)
+			}
+			reply, err := router.Route(context.Background(), Request{Input: input})
+			if err != nil || reply != "opinion reply" || !called {
+				t.Fatalf("opinion question dispatch: reply=%q err=%v called=%v", reply, err, called)
+			}
+		})
 	}
 }
 

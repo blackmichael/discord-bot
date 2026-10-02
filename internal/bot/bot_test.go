@@ -214,6 +214,29 @@ func TestHandleReplies(t *testing.T) {
 	}
 }
 
+func TestHandleRepliesToReferencedMessage(t *testing.T) {
+	replies := make(chan *discordgo.MessageSend, 1)
+	b, _ := testBot(t, routerFunc(func(_ context.Context, req command.Request) (string, error) {
+		if req.ParentContent != "message A" {
+			t.Errorf("parent content = %q", req.ParentContent)
+		}
+		return "reply", nil
+	}), discordFunc(func(_ string, msg *discordgo.MessageSend, _ ...discordgo.RequestOption) (*discordgo.Message, error) {
+		replies <- msg
+		return nil, nil
+	}), time.Minute, 1)
+
+	event := testMessage("<@123> opinion")
+	event.Message.MessageReference = &discordgo.MessageReference{MessageID: "message-a", ChannelID: "channel", GuildID: "guild"}
+	event.Message.ReferencedMessage = &discordgo.Message{ID: "message-a", Content: "message A"}
+	b.respond(event.Message, "opinion")
+
+	reply := receive(t, replies)
+	if reply.Reference == nil || reply.Reference.MessageID != "message-a" || reply.Reference.ChannelID != "channel" || reply.Reference.GuildID != "guild" {
+		t.Fatalf("reply reference = %+v", reply.Reference)
+	}
+}
+
 func TestRequestDeadlineAllowsSafeReply(t *testing.T) {
 	replied := make(chan error, 1)
 	b, _ := testBot(t, routerFunc(func(ctx context.Context, _ command.Request) (string, error) {

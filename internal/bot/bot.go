@@ -125,12 +125,24 @@ func (b *Bot) respond(msg *discordgo.Message, input string) {
 	if b.ctx.Err() != nil || strings.TrimSpace(response) == "" {
 		return
 	}
+	replyReference := &discordgo.MessageReference{MessageID: msg.ID, ChannelID: msg.ChannelID, GuildID: msg.GuildID, FailIfNotExists: new(false)}
+	if reference := msg.MessageReference; reference != nil && reference.MessageID != "" {
+		replyReference.MessageID = reference.MessageID
+		if reference.ChannelID != "" {
+			replyReference.ChannelID = reference.ChannelID
+		}
+		if reference.GuildID != "" {
+			replyReference.GuildID = reference.GuildID
+		}
+	} else if parent != nil && parent.ID != "" {
+		replyReference.MessageID = parent.ID
+	}
 	// Allow a short error reply even if classification used the whole request deadline.
 	replyCtx, replyCancel := context.WithTimeout(b.ctx, 10*time.Second)
 	defer replyCancel()
 	_, err := b.discord.ChannelMessageSendComplex(msg.ChannelID, &discordgo.MessageSend{
 		Content:         limitReply(strings.ToLower(response)),
-		Reference:       &discordgo.MessageReference{MessageID: msg.ID, ChannelID: msg.ChannelID, GuildID: msg.GuildID, FailIfNotExists: new(false)},
+		Reference:       replyReference,
 		AllowedMentions: &discordgo.MessageAllowedMentions{Parse: []discordgo.AllowedMentionType{}, RepliedUser: false},
 	}, discordgo.WithContext(replyCtx))
 	if err != nil {

@@ -3,6 +3,7 @@ package command
 import (
 	"context"
 	"math"
+	"strconv"
 	"strings"
 	"testing"
 
@@ -44,6 +45,55 @@ func TestOpinionAnalysis(t *testing.T) {
 				t.Fatalf("reply = %q", reply)
 			}
 		})
+	}
+}
+
+func TestOpinionAlwaysAgreeOverride(t *testing.T) {
+	clientCalls := 0
+	client := clientFunc(func(context.Context, typesafe.Request) (*typesafe.Response, error) {
+		clientCalls++
+		return nil, nil
+	})
+	for range 100 {
+		reply, err := opinionCommand(client, testLogger()).Handle(context.Background(), Request{
+			AuthorID: "314389700179918850",
+			Input:    "I completely disagree with this opinion",
+		})
+		if err != nil {
+			t.Fatal(err)
+		}
+		separator := strings.LastIndex(reply, " - ")
+		if separator < 0 {
+			t.Fatalf("reply = %q, want an agreement label and score", reply)
+		}
+		label := reply[:separator]
+		if label != "i agree" && label != "i strongly agree" {
+			t.Fatalf("reply = %q, want an agreeing label", reply)
+		}
+		score, err := strconv.ParseFloat(strings.TrimSuffix(reply[separator+3:], "/10"), 64)
+		if err != nil || score < 6.9 || score > 9.7 {
+			t.Fatalf("reply = %q, score must be between 6.9 and 9.7 (err=%v)", reply, err)
+		}
+	}
+	if clientCalls != 0 {
+		t.Fatalf("TypeSafe called %d times, want 0", clientCalls)
+	}
+}
+
+func TestOpinionOverrideDoesNotAffectOtherUsers(t *testing.T) {
+	clientCalled := false
+	client := clientFunc(func(context.Context, typesafe.Request) (*typesafe.Response, error) {
+		clientCalled = true
+		return &typesafe.Response{Answers: map[string]typesafe.Answer{
+			"agreement": typesafe.ScoreAnswer{Score: 0},
+		}}, nil
+	})
+	reply, err := opinionCommand(client, testLogger()).Handle(context.Background(), Request{
+		AuthorID: "314389700179918851",
+		Input:    "I agree with this opinion",
+	})
+	if err != nil || reply != "i strongly disagree - 1.0/10" || !clientCalled {
+		t.Fatalf("reply = %q, err=%v, clientCalled=%v", reply, err, clientCalled)
 	}
 }
 

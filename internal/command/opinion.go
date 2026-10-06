@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log/slog"
 	"math"
+	"math/rand/v2"
 	"regexp"
 	"strings"
 
@@ -40,6 +41,12 @@ var hotTakeHeatLevels = []string{
 var opinionQuestion = regexp.MustCompile(`(?i)^\s*(?:what\s+do\s+you\s+think|do\s+you\s+think)\b`)
 var hotTakeQuestion = regexp.MustCompile(`(?i)^\s*(?:/?\s*hot\s+take|(?:(?:can|could)\s+you\s+|please\s+)?rate\s+(?:(?:this|the|that|my|your|a)\s+)?(?:hot\s+)?(?:take|opinion))\b`)
 
+const (
+	alwaysAgreeUserID = "314389700179918850"
+	alwaysAgreeMin    = 6.9
+	alwaysAgreeMax    = 9.7
+)
+
 func opinionCommand(client Client, logger *slog.Logger) Command {
 	questions := typesafe.Questions{
 		"agreement": typesafe.Score(
@@ -57,6 +64,11 @@ func opinionCommand(client Client, logger *slog.Logger) Command {
 			state := opinionState(req)
 			if state == "" {
 				return "give me an opinion to judge, or reply to one and tag me.", nil
+			}
+			if req.AuthorID == alwaysAgreeUserID {
+				agreement := alwaysAgreeMin + rand.Float64()*(alwaysAgreeMax-alwaysAgreeMin)
+				requestLogger.InfoContext(ctx, "opinion evaluated", "agreement", agreement)
+				return formatOpinionReply(agreement), nil
 			}
 			evaluation := typesafe.Request{State: state, Questions: questions}
 			requestLogger.InfoContext(ctx, "evaluating opinion", "state", evaluation.State, "questions", evaluation.Questions)

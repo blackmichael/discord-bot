@@ -41,8 +41,35 @@ func TestOpinionAnalysis(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
-			if reply != "i agree - 7.3/10" {
+			if reply != "i slightly disagree - 3.7/10" {
 				t.Fatalf("reply = %q", reply)
+			}
+		})
+	}
+}
+
+func TestOpinionAgreementScoreIsInverted(t *testing.T) {
+	for _, tt := range []struct {
+		name  string
+		score float64
+		want  string
+	}{
+		{name: "minimum", score: 0, want: "i strongly agree - 10.0/10"},
+		{name: "fractional low score", score: 0.12, want: "i strongly agree - 9.9/10"},
+		{name: "middle", score: 4, want: "i slightly agree - 6.0/10"},
+		{name: "maximum", score: 9, want: "i strongly disagree - 1.0/10"},
+	} {
+		t.Run(tt.name, func(t *testing.T) {
+			client := clientFunc(func(context.Context, typesafe.Request) (*typesafe.Response, error) {
+				return &typesafe.Response{Answers: map[string]typesafe.Answer{
+					"agreement": typesafe.ScoreAnswer{Score: tt.score},
+				}}, nil
+			})
+			reply, err := opinionCommand(client, testLogger()).Handle(context.Background(), Request{
+				Input: "I don't think this is a good idea",
+			})
+			if err != nil || reply != tt.want {
+				t.Fatalf("reply = %q, want %q, err=%v", reply, tt.want, err)
 			}
 		})
 	}
@@ -80,7 +107,7 @@ func TestOpinionAlwaysAgreeOverride(t *testing.T) {
 	}
 }
 
-func TestOpinionOverrideDoesNotAffectOtherUsers(t *testing.T) {
+func TestOpinionOverrideLeavesOtherUsersModelEvaluated(t *testing.T) {
 	clientCalled := false
 	client := clientFunc(func(context.Context, typesafe.Request) (*typesafe.Response, error) {
 		clientCalled = true
@@ -92,7 +119,7 @@ func TestOpinionOverrideDoesNotAffectOtherUsers(t *testing.T) {
 		AuthorID: "314389700179918851",
 		Input:    "I agree with this opinion",
 	})
-	if err != nil || reply != "i strongly disagree - 1.0/10" || !clientCalled {
+	if err != nil || reply != "i strongly agree - 10.0/10" || !clientCalled {
 		t.Fatalf("reply = %q, err=%v, clientCalled=%v", reply, err, clientCalled)
 	}
 }

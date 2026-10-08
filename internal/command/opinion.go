@@ -83,8 +83,9 @@ func opinionCommand(client Client, logger *slog.Logger) Command {
 			if !ok || math.IsNaN(agreement.Score) || math.IsInf(agreement.Score, 0) || agreement.Score < 0 || agreement.Score > float64(len(opinionAgreementLevels)-1) {
 				return "", fmt.Errorf("evaluate opinion: invalid agreement")
 			}
-			requestLogger.InfoContext(ctx, "opinion evaluated", "agreement", agreement.Score+1, "model", resp.Model, "request_id", resp.RequestID)
-			return formatOpinionReply(agreement.Score + 1), nil
+			invertedAgreement := float64(len(opinionAgreementLevels)) - agreement.Score
+			requestLogger.InfoContext(ctx, "opinion evaluated", "agreement", invertedAgreement, "model", resp.Model, "request_id", resp.RequestID)
+			return formatOpinionReply(invertedAgreement), nil
 		},
 	}
 }

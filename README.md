@@ -204,7 +204,7 @@ does not send or log unrelated conversation history or attachments as context.
 
 ## Run Locally
 
-Use Go 1.27 or newer. The binary reads process environment variables, not `.env`
+Use Go 1.27.3 or newer. The binary reads process environment variables, not `.env`
 files itself. For example:
 
 ```sh
